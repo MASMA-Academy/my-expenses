@@ -133,21 +133,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: widget.onAddTransaction,
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: widget.onAddTransaction,
 
-        backgroundColor: const Color(0xFF277765),
-        foregroundColor: Colors.white,
+      //   backgroundColor: const Color(0xFF277765),
+      //   foregroundColor: Colors.white,
 
-        elevation: 3,
+      //   elevation: 3,
 
-        shape: const CircleBorder(),
+      //   shape: const CircleBorder(),
 
-        child: const Icon(
-          Icons.add_rounded,
-          size: 32,
-        ),
-      ),
+      //   child: const Icon(
+      //     Icons.add_rounded,
+      //     size: 32,
+      //   ),
+      // ),
     );
   }
 
