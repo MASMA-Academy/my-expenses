@@ -86,27 +86,58 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // ==============================
-  // ADD TRANSACTION
+  // ADD / EDIT / DELETE TRANSACTION
   // ==============================
 
   Future<void> openAddTransaction() async {
+    await _openTransactionForm();
+  }
+
+  Future<void> openEditTransaction(TransactionItem item) async {
+    await _openTransactionForm(existing: item);
+  }
+
+  Future<void> _openTransactionForm({TransactionItem? existing}) async {
     final result = await Navigator.push<TransactionItem>(
       context,
       MaterialPageRoute(
-        builder: (context) => const AddTransactionScreen(),
+        builder: (context) => AddTransactionScreen(existing: existing),
       ),
     );
 
-    if (result != null) {
-      await AppDatabase.instance.insertTransaction(result);
+    if (result == null) return;
+
+    if (result.id == null) {
+      final inserted = await AppDatabase.instance.insertTransaction(result);
 
       setState(() {
-        transactions.add(result);
+        transactions.add(inserted);
 
         // Lepas save balik Dashboard
         currentIndex = 0;
       });
+    } else {
+      await AppDatabase.instance.updateTransaction(result);
+
+      setState(() {
+        final index = transactions.indexWhere((t) => t.id == result.id);
+
+        if (index != -1) {
+          transactions[index] = result;
+        }
+      });
     }
+  }
+
+  Future<void> deleteTransaction(TransactionItem item) async {
+    final id = item.id;
+    if (id == null) return;
+
+    await AppDatabase.instance.deleteTransaction(id);
+
+    setState(() {
+      transactions.removeWhere((t) => t.id == id);
+    });
   }
 
   // ==============================
@@ -146,6 +177,8 @@ class _MainScreenState extends State<MainScreen> {
         return HistoryScreen(
           transactions: transactions,
           onAddTransaction: openAddTransaction,
+          onEditTransaction: openEditTransaction,
+          onDeleteTransaction: deleteTransaction,
         );
 
       case 4:
