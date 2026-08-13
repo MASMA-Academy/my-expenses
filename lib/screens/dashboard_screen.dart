@@ -97,34 +97,63 @@ class DashboardScreen extends StatelessWidget {
     required this.onOpenHistory,
   });
 
+
+List<TransactionItem> get currentMonthTransactions {
+  final now = DateTime.now();
+
+  return transactions.where((item) {
+    return item.date.year == now.year &&
+        item.date.month == now.month;
+  }).toList();
+}
+
   // =========================================================
   // CALCULATION
   // =========================================================
 
   double get totalIncome {
-    return transactions
-        .where((item) => item.income)
-        .fold(0.0, (sum, item) => sum + item.amount);
-  }
+  return currentMonthTransactions
+      .where((item) => item.income)
+      .fold(
+        0.0,
+        (sum, item) => sum + item.amount,
+      );
+}
 
   double get totalExpense {
-    return transactions
-        .where((item) => !item.income)
-        .fold(0.0, (sum, item) => sum + item.amount);
-  }
+  return currentMonthTransactions
+      .where((item) => !item.income)
+      .fold(
+        0.0,
+        (sum, item) => sum + item.amount,
+      );
+}
 
   double get balance => totalIncome - totalExpense;
 
-  double categoryTotal(String category) {
-    return transactions
-        .where(
-          (item) => !item.income && item.category == category,
-        )
-        .fold(
-          0.0,
-          (sum, item) => sum + item.amount,
-        );
-  }
+  // double categoryTotal(String category) {
+  //   return transactions
+  //       .where(
+  //         (item) => !item.income && item.category == category,
+  //       )
+  //       .fold(
+  //         0.0,
+  //         (sum, item) => sum + item.amount,
+  //       );
+  // }
+
+double categoryTotal(String category) {
+  return currentMonthTransactions
+      .where(
+        (item) =>
+            !item.income &&
+            item.category == category,
+      )
+      .fold(
+        0.0,
+        (sum, item) => sum + item.amount,
+      );
+}
 
   @override
   Widget build(BuildContext context) {
