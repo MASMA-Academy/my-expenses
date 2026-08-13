@@ -2,11 +2,93 @@
 
 import 'package:flutter/material.dart';
 import '../models/transaction_item.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class DashboardScreen extends StatelessWidget {
   final List<TransactionItem> transactions;
   final VoidCallback onAddTransaction;
   final VoidCallback onOpenHistory;
+
+  // =========================================================
+  // CURRENT GREETING
+  // =========================================================
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      return 'Good morning!';
+    }
+
+    if (hour >= 12 && hour < 17) {
+      return 'Good afternoon!';
+    }
+
+    if (hour >= 17 && hour < 21) {
+      return 'Good evening!';
+    }
+
+    return 'Good night!';
+  }
+
+  String _getGreetingEmoji() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      return '🌸';
+    }
+
+    if (hour >= 12 && hour < 17) {
+      return '☀️';
+    }
+
+    if (hour >= 17 && hour < 21) {
+      return '🌷';
+    }
+
+    return '🌙';
+  }
+
+  String _getGreetingMessage() {
+    final hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      return "Let's start the day with smart spending 💚";
+    }
+
+    if (hour >= 12 && hour < 17) {
+      return "Hope your day is going wonderfully ✨";
+    }
+
+    if (hour >= 17 && hour < 21) {
+      return "Let's wrap up today beautifully 💕";
+    }
+
+    return "Rest well and recharge for tomorrow 🌙";
+  }
+
+  // =========================================================
+  // CURRENT MONTH NAME
+  // =========================================================
+
+  String _monthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+
+    return months[month - 1];
+  }
 
   const DashboardScreen({
     super.key,
@@ -38,7 +120,10 @@ class DashboardScreen extends StatelessWidget {
         .where(
           (item) => !item.income && item.category == category,
         )
-        .fold(0.0, (sum, item) => sum + item.amount);
+        .fold(
+          0.0,
+          (sum, item) => sum + item.amount,
+        );
   }
 
   @override
@@ -57,7 +142,6 @@ class DashboardScreen extends StatelessWidget {
             20,
             30,
           ),
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -73,9 +157,9 @@ class DashboardScreen extends StatelessWidget {
               // GREETING
               // =================================================
 
-              const Text(
-                'Good morning! 💖',
-                style: TextStyle(
+              Text(
+                '${_getGreeting()} ${_getGreetingEmoji()}',
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF292323),
@@ -84,9 +168,9 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 5),
 
-              const Text(
-                "Let's make today count 💚",
-                style: TextStyle(
+              Text(
+                _getGreetingMessage(),
+                style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF8B8583),
                 ),
@@ -106,9 +190,10 @@ class DashboardScreen extends StatelessWidget {
               // OVERVIEW TITLE
               // =================================================
 
-              const Text(
-                'August 2026 Overview',
-                style: TextStyle(
+              Text(
+                '${_monthName(DateTime.now().month)} '
+                '${DateTime.now().year} Overview',
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF292323),
@@ -219,14 +304,18 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildBalanceCard() {
     return Container(
       width: double.infinity,
-
       padding: const EdgeInsets.all(17),
-
       decoration: BoxDecoration(
         color: const Color(0xFF7EBBA9),
         borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF277765).withOpacity(0.15),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -291,25 +380,21 @@ class DashboardScreen extends StatelessWidget {
         horizontal: 10,
         vertical: 10,
       ),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(13),
       ),
-
       child: Row(
         children: [
           Container(
             width: 34,
             height: 34,
-
             decoration: BoxDecoration(
               color: income
                   ? const Color(0xFFC9F2E5)
                   : const Color(0xFFFFDCDD),
               shape: BoxShape.circle,
             ),
-
             child: Icon(
               income
                   ? Icons.arrow_downward_rounded
@@ -363,12 +448,10 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildOverviewCard() {
     return Container(
       width: double.infinity,
-
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 18,
       ),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
@@ -380,10 +463,8 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-
       child: Row(
         children: [
-          // Simple chart
           _buildPieChart(),
 
           const SizedBox(width: 20),
@@ -392,6 +473,7 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               children: [
                 _buildCategoryRow(
+                  emoji: '🍔',
                   color: const Color(0xFF7EBBA9),
                   title: 'Food',
                   amount: categoryTotal('Food'),
@@ -400,6 +482,7 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 _buildCategoryRow(
+                  emoji: '🚗',
                   color: const Color(0xFFFFA6AA),
                   title: 'Transport',
                   amount: categoryTotal('Transport'),
@@ -408,7 +491,8 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 _buildCategoryRow(
-                  color: const Color(0xFFFFD7D7),
+                  emoji: '🛍️',
+                  color: const Color(0xFFD9CCFF),
                   title: 'Shopping',
                   amount: categoryTotal('Shopping'),
                 ),
@@ -416,7 +500,8 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 _buildCategoryRow(
-                  color: const Color(0xFFD4D0C8),
+                  emoji: '💡',
+                  color: const Color(0xFFFFD89C),
                   title: 'Bills',
                   amount: categoryTotal('Bills'),
                 ),
@@ -429,72 +514,140 @@ class DashboardScreen extends StatelessWidget {
   }
 
   // =========================================================
-  // SIMPLE DONUT / PIE STYLE
+  // SIMPLE PIE STYLE
   // =========================================================
 
   Widget _buildPieChart() {
-    return SizedBox(
-      width: 110,
-      height: 110,
+  final food = categoryTotal('Food');
+  final transport = categoryTotal('Transport');
+  final shopping = categoryTotal('Shopping');
+  final bills = categoryTotal('Bills');
 
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 105,
-            height: 105,
+  final total = food + transport + shopping + bills;
 
-            child: CircularProgressIndicator(
-              value: totalExpense == 0 ? 0 : 1,
-              strokeWidth: 26,
-              backgroundColor: const Color(0xFFF4E5E3),
-              color: const Color(0xFF7EBBA9),
-            ),
+  if (total == 0) {
+    return Container(
+      width: 115,
+      height: 115,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8ECEA),
+        shape: BoxShape.circle,
+      ),
+      child: const Center(
+        child: Text(
+          '🌱\nNo data',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            color: Color(0xFF8B8583),
+            fontWeight: FontWeight.w600,
           ),
+        ),
+      ),
+    );
+  }
 
-          Container(
-            width: 58,
-            height: 58,
+  return SizedBox(
+    width: 120,
+    height: 120,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        PieChart(
+          PieChartData(
+            startDegreeOffset: -90,
+            centerSpaceRadius: 36,
+            sectionsSpace: 3,
 
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-
-            alignment: Alignment.center,
-
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey,
-                  ),
+            sections: [
+              if (food > 0)
+                PieChartSectionData(
+                  value: food,
+                  color: const Color(0xFF7EBBA9),
+                  radius: 22,
+                  showTitle: false,
                 ),
 
-                Text(
+              if (transport > 0)
+                PieChartSectionData(
+                  value: transport,
+                  color: const Color(0xFFFFA6AA),
+                  radius: 22,
+                  showTitle: false,
+                ),
+
+              if (shopping > 0)
+                PieChartSectionData(
+                  value: shopping,
+                  color: const Color(0xFFD9CCFF),
+                  radius: 22,
+                  showTitle: false,
+                ),
+
+              if (bills > 0)
+                PieChartSectionData(
+                  value: bills,
+                  color: const Color(0xFFFFD89C),
+                  radius: 22,
+                  showTitle: false,
+                ),
+            ],
+          ),
+        ),
+
+        Container(
+          width: 65,
+          height: 65,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Color(0xFF9A8D88),
+                ),
+              ),
+
+              const SizedBox(height: 2),
+
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
                   'RM ${totalExpense.toStringAsFixed(0)}',
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF4B4543),
+                    color: Color(0xFF403633),
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              const Text(
+                '♡',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Color(0xFFF2A6B3),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   // =========================================================
   // CATEGORY
   // =========================================================
 
   Widget _buildCategoryRow({
+    required String emoji,
     required Color color,
     required String title,
     required double amount,
@@ -502,16 +655,22 @@ class DashboardScreen extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 11,
-          height: 11,
-
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
+            color: color.withOpacity(0.18),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Text(
+            emoji,
+            style: const TextStyle(
+              fontSize: 15,
+            ),
           ),
         ),
 
-        const SizedBox(width: 7),
+        const SizedBox(width: 8),
 
         Expanded(
           child: Text(
@@ -544,33 +703,33 @@ class DashboardScreen extends StatelessWidget {
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 9),
-
       padding: const EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 10,
       ),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(17),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.025),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
-
       child: Row(
         children: [
-          // Emoji
           Container(
             width: 46,
             height: 46,
-
             alignment: Alignment.center,
-
             decoration: BoxDecoration(
               color: item.income
                   ? const Color(0xFFE1F4E9)
                   : _categoryBackground(item.category),
               borderRadius: BorderRadius.circular(12),
             ),
-
             child: Text(
               item.emoji,
               style: const TextStyle(
@@ -581,7 +740,6 @@ class DashboardScreen extends StatelessWidget {
 
           const SizedBox(width: 12),
 
-          // Title
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,7 +766,6 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
 
-          // Amount
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -656,17 +813,14 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
-
       padding: const EdgeInsets.symmetric(
         vertical: 35,
         horizontal: 20,
       ),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-
       child: Column(
         children: [
           const Text(
@@ -700,17 +854,17 @@ class DashboardScreen extends StatelessWidget {
 
           ElevatedButton.icon(
             onPressed: onAddTransaction,
-
             style: ElevatedButton.styleFrom(
               elevation: 0,
               backgroundColor: const Color(0xFF277765),
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
             ),
-
             icon: const Icon(
               Icons.add_rounded,
             ),
-
             label: const Text(
               'Add Transaction',
             ),
@@ -737,6 +891,12 @@ class DashboardScreen extends StatelessWidget {
 
       case 'Bills':
         return const Color(0xFFFFF1C9);
+
+      case 'Family':
+        return const Color(0xFFFFE3D6);
+
+      case 'Health':
+        return const Color(0xFFFFDFE6);
 
       default:
         return const Color(0xFFFFECE9);
