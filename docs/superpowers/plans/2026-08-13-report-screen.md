@@ -1,3 +1,36 @@
+# Report Screen Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build the Reports tab (`ReportScreen`) matching the supplied mockup — Week/Month/Year period selector, category donut breakdown, income vs expense bars, and a period summary — driven by real data from the app's `List<TransactionItem>`, then wire it into the bottom-nav shell.
+
+**Architecture:** One self-contained `StatefulWidget` (`ReportScreen`) in `lib/screens/report_screen.dart`, following the exact pattern already used by `DashboardScreen`/`HistoryScreen` (a single file, plain `setState`, no external state management). A private `CustomPainter` (`_DonutPainter`) in the same file draws the multi-segment category ring — no charting package needed. `main.dart` is edited only to uncomment the existing (currently commented-out) `ReportScreen` case.
+
+**Tech Stack:** Flutter/Dart, Material 3 widgets, `dart:math` for the donut painter's arc angles. No new packages.
+
+## Global Constraints
+
+- No new dependencies — use only `flutter/material.dart` and `dart:math` (per spec's "Dependencies to add: None").
+- Reuse the app's existing color palette and per-category colors already established in `DashboardScreen`/`HistoryScreen` (e.g. `#277765` primary green, `#74B9A8` teal, `#FFF8F6` background) rather than inventing a new palette.
+- No automated tests added — this matches the existing convention (`DashboardScreen`/`HistoryScreen` have none); verification is `flutter analyze` + manual run, per spec's "Testing / verification" section.
+- Follow the existing single-file-per-screen structure; do not split `ReportScreen` across multiple files.
+
+---
+
+### Task 1: Build the `ReportScreen` widget
+
+**Files:**
+- Create: `lib/screens/report_screen.dart`
+
+**Interfaces:**
+- Consumes: `TransactionItem` from `lib/models/transaction_item.dart` (fields: `title`, `category`, `amount`, `income`, `date`, getter `emoji` — already defined, not modified).
+- Produces: `class ReportScreen extends StatefulWidget` with constructor `ReportScreen({super.key, required List<TransactionItem> transactions})` — this exact constructor signature is what Task 2 wires into `main.dart`.
+
+- [ ] **Step 1: Create the full screen file**
+
+Create `lib/screens/report_screen.dart` with this exact content:
+
+```dart
 // lib/screens/report_screen.dart
 
 import 'dart:math' as math;
@@ -516,7 +549,7 @@ class _ReportScreenState extends State<ReportScreen> {
             labelColor: const Color(0xFF347B69),
           ),
           _incomeExpenseBar(
-            emoji: '📉',
+            emoji: '🐷',
             label: 'Expense',
             amount: _totalExpense,
             barHeight: maxBarHeight * (_totalExpense / maxValue),
@@ -704,3 +737,71 @@ class _DonutPainter extends CustomPainter {
         oldDelegate.colorFor != colorFor;
   }
 }
+```
+
+- [ ] **Step 2: Verify it analyzes cleanly**
+
+Run: `flutter analyze lib/screens/report_screen.dart`
+Expected: `No issues found!`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add lib/screens/report_screen.dart
+git commit -m "Add ReportScreen with period selector, category donut, income vs expense, and summary"
+```
+
+---
+
+### Task 2: Wire `ReportScreen` into the app shell
+
+**Files:**
+- Modify: `lib/main.dart:111-114`
+
+**Interfaces:**
+- Consumes: `ReportScreen({super.key, required List<TransactionItem> transactions})` from Task 1.
+- Produces: Reachable Reports tab (index 1) in `MainScreen.getCurrentScreen()`.
+
+- [ ] **Step 1: Uncomment the `ReportScreen` case**
+
+In `lib/main.dart`, the switch inside `getCurrentScreen()` currently has (around line 111):
+
+```dart
+      // case 1:
+      //   return ReportScreen(
+      //     transactions: transactions,
+      //   );
+```
+
+Replace it with:
+
+```dart
+      case 1:
+        return ReportScreen(
+          transactions: transactions,
+        );
+```
+
+(The `import 'screens/report_screen.dart';` at the top of `main.dart` is already present and uncommented — no import change needed.)
+
+- [ ] **Step 2: Run analyze on the whole project**
+
+Run: `flutter analyze`
+Expected: `No issues found!`
+
+- [ ] **Step 3: Manually verify in the running app**
+
+Use the `run` skill (or `flutter run`) to launch the app:
+- Tap the "Report" tab in the bottom nav — the Reports screen should appear.
+- With zero transactions, confirm the 🌱 empty state shows instead of the charts.
+- Add a couple of transactions (via the `+` button — some income, some expenses across different categories, e.g. Food and Transport) and return to Reports.
+- Confirm the category donut and legend reflect the added expenses, income/expense bars reflect totals, and the summary chips match.
+- Tap Week, Month, Year — each should recompute the label and totals for that period.
+- Tap the prev/next chevrons and the calendar icon — confirm the period label and data update accordingly.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add lib/main.dart
+git commit -m "Wire ReportScreen into the bottom-nav Reports tab"
+```

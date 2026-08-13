@@ -108,10 +108,10 @@ class _MainScreenState extends State<MainScreen> {
           },
         );
 
-      // case 1:
-      //   return ReportScreen(
-      //     transactions: transactions,
-      //   );
+      case 1:
+        return ReportScreen(
+          transactions: transactions,
+        );
 
       case 3:
         return HistoryScreen(
