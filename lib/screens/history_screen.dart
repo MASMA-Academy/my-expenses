@@ -5,11 +5,15 @@ import '../models/transaction_item.dart';
 class HistoryScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
   final VoidCallback onAddTransaction;
+  final void Function(TransactionItem transaction) onEditTransaction;
+  final void Function(TransactionItem transaction) onDeleteTransaction;
 
   const HistoryScreen({
     super.key,
     required this.transactions,
     required this.onAddTransaction,
+    required this.onEditTransaction,
+    required this.onDeleteTransaction,
   });
 
   @override
@@ -369,103 +373,157 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildTransactionCard(
     TransactionItem transaction,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(
-        bottom: 10,
+    return Dismissible(
+      key: ValueKey(transaction.id),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (_) => _confirmDelete(transaction),
+      onDismissed: (_) {
+        widget.onDeleteTransaction(transaction);
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        alignment: Alignment.centerRight,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE36C6C),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: const Icon(
+          Icons.delete_outline_rounded,
+          color: Colors.white,
+        ),
       ),
-
-      padding: const EdgeInsets.all(14),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
+      child: InkWell(
+        onTap: () => widget.onEditTransaction(transaction),
         borderRadius: BorderRadius.circular(18),
-      ),
+        child: Container(
+          margin: const EdgeInsets.only(
+            bottom: 10,
+          ),
 
-      child: Row(
-        children: [
-          Container(
-            width: 46,
-            height: 46,
+          padding: const EdgeInsets.all(14),
 
-            alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+          ),
 
-            decoration: BoxDecoration(
-              color: transaction.income
-                  ? const Color(0xFFE1F4E9)
-                  : getCategoryColor(
-                      transaction.category,
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+
+                alignment: Alignment.center,
+
+                decoration: BoxDecoration(
+                  color: transaction.income
+                      ? const Color(0xFFE1F4E9)
+                      : getCategoryColor(
+                          transaction.category,
+                        ),
+
+                  shape: BoxShape.circle,
+                ),
+
+                child: Text(
+                  transaction.emoji,
+
+                  style: const TextStyle(
+                    fontSize: 22,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+                    Text(
+                      transaction.title,
+
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
 
-              shape: BoxShape.circle,
-            ),
+                    const SizedBox(height: 3),
 
-            child: Text(
-              transaction.emoji,
+                    Text(
+                      transaction.category,
 
-              style: const TextStyle(
-                fontSize: 22,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                      ),
+                    ),
+
+                    const SizedBox(height: 3),
+
+                    Text(
+                      formatDate(
+                        transaction.date,
+                      ),
+
+                      style: const TextStyle(
+                        color: Color(0xFF74B9A8),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
 
-          const SizedBox(width: 12),
+              Text(
+                '${transaction.income ? '+' : '-'} RM ${transaction.amount.toStringAsFixed(2)}',
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+                style: TextStyle(
+                  color: transaction.income
+                      ? const Color(0xFF347B69)
+                      : const Color(0xFFA64E4E),
 
-              children: [
-                Text(
-                  transaction.title,
-
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
                 ),
-
-                const SizedBox(height: 3),
-
-                Text(
-                  transaction.category,
-
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                ),
-
-                const SizedBox(height: 3),
-
-                Text(
-                  formatDate(
-                    transaction.date,
-                  ),
-
-                  style: const TextStyle(
-                    color: Color(0xFF74B9A8),
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-
-          Text(
-            '${transaction.income ? '+' : '-'} RM ${transaction.amount.toStringAsFixed(2)}',
-
-            style: TextStyle(
-              color: transaction.income
-                  ? const Color(0xFF347B69)
-                  : const Color(0xFFA64E4E),
-
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
-            ),
-          ),
-        ],
+        ),
       ),
     );
+  }
+
+  Future<bool> _confirmDelete(TransactionItem transaction) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete transaction?'),
+          content: Text(
+            'This will permanently delete "${transaction.title}".',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Color(0xFFE36C6C)),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    return confirmed ?? false;
   }
 
   Color getCategoryColor(String category) {
