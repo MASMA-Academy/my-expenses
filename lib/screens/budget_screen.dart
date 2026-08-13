@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/transaction_item.dart';
+import '../db/app_database.dart';
 
 class BudgetScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -69,6 +70,24 @@ class _BudgetScreenState extends State<BudgetScreen> {
     super.initState();
 
     _displayMonth = DateTime.now();
+
+    _loadBudgetLimits();
+  }
+
+  Future<void> _loadBudgetLimits() async {
+    final limits = await AppDatabase.instance.getBudgetLimits();
+
+    if (limits.isEmpty) return;
+
+    setState(() {
+      for (final category in _categories) {
+        final savedLimit = limits[category.title];
+
+        if (savedLimit != null) {
+          category.limit = savedLimit;
+        }
+      }
+    });
   }
 
   // =========================================================
@@ -391,7 +410,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           width: double.infinity,
                           height: 56,
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               final amount = double.tryParse(
                                 budgetController.text.trim(),
                               );
@@ -412,6 +431,13 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                 (item) =>
                                     item.title == selectedCategory,
                               );
+
+                              await AppDatabase.instance.setBudgetLimit(
+                                category.title,
+                                amount,
+                              );
+
+                              if (!mounted) return;
 
                               setState(() {
                                 category.limit = amount;
