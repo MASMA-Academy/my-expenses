@@ -732,7 +732,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 ),
                 child: const Center(
                   child: Text(
-                    '🐷',
+                    '💰',
                     style: TextStyle(
                       fontSize: 46,
                     ),
