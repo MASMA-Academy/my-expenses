@@ -5,8 +5,14 @@ import '../models/transaction_item.dart';
 class HistoryScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
   final VoidCallback onAddTransaction;
-  final void Function(TransactionItem transaction) onEditTransaction;
-  final void Function(TransactionItem transaction) onDeleteTransaction;
+
+  final void Function(
+    TransactionItem transaction,
+  ) onEditTransaction;
+
+  final void Function(
+    TransactionItem transaction,
+  ) onDeleteTransaction;
 
   const HistoryScreen({
     super.key,
@@ -17,10 +23,12 @@ class HistoryScreen extends StatefulWidget {
   });
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<HistoryScreen> createState() =>
+      _HistoryScreenState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class _HistoryScreenState
+    extends State<HistoryScreen> {
   // =========================================================
   // FILTER
   // =========================================================
@@ -37,7 +45,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   );
 
   // =========================================================
-  // MONTH NAME
+  // MONTHS
   // =========================================================
 
   static const List<String> months = [
@@ -60,18 +68,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
 
   String get selectedMonthLabel {
-    return '${months[selectedMonth.month - 1]} ${selectedMonth.year}';
+    return '${months[selectedMonth.month - 1]} '
+        '${selectedMonth.year}';
   }
 
   // =========================================================
-  // TRANSACTIONS FOR SELECTED MONTH
+  // TRANSACTIONS FOR MONTH
   // =========================================================
 
   List<TransactionItem> get monthTransactions {
     return widget.transactions.where(
       (transaction) {
-        return transaction.date.year == selectedMonth.year &&
-            transaction.date.month == selectedMonth.month;
+        return transaction.date.year ==
+                selectedMonth.year &&
+            transaction.date.month ==
+                selectedMonth.month;
       },
     ).toList();
   }
@@ -81,40 +92,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
 
   List<TransactionItem> get filteredTransactions {
-    List<TransactionItem> result = List.from(
+    List<TransactionItem> result =
+        List<TransactionItem>.from(
       monthTransactions,
     );
 
     if (selectedFilter == 'Income') {
       result = result
           .where(
-            (transaction) => transaction.income,
+            (transaction) =>
+                transaction.income,
           )
           .toList();
     } else if (selectedFilter == 'Expense') {
       result = result
           .where(
-            (transaction) => !transaction.income,
+            (transaction) =>
+                !transaction.income,
           )
           .toList();
     }
 
-    // Latest transaction first
+    // latest first
     result.sort(
-      (a, b) => b.date.compareTo(a.date),
+      (a, b) =>
+          b.date.compareTo(a.date),
     );
 
     return result;
   }
 
   // =========================================================
-  // TOTAL INCOME FOR SELECTED MONTH
+  // TOTAL INCOME
   // =========================================================
 
   double get totalIncome {
     return monthTransactions
         .where(
-          (transaction) => transaction.income,
+          (transaction) =>
+              transaction.income,
         )
         .fold(
           0.0,
@@ -124,13 +140,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   // =========================================================
-  // TOTAL EXPENSE FOR SELECTED MONTH
+  // TOTAL EXPENSE
   // =========================================================
 
   double get totalExpense {
     return monthTransactions
         .where(
-          (transaction) => !transaction.income,
+          (transaction) =>
+              !transaction.income,
         )
         .fold(
           0.0,
@@ -140,7 +157,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   // =========================================================
-  // PREVIOUS MONTH
+  // BALANCE FOR MONTH
+  // =========================================================
+
+  double get monthBalance {
+    return totalIncome - totalExpense;
+  }
+
+  // =========================================================
+  // MONTH NAVIGATION
   // =========================================================
 
   void previousMonth() {
@@ -151,10 +176,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       );
     });
   }
-
-  // =========================================================
-  // NEXT MONTH
-  // =========================================================
 
   void nextMonth() {
     setState(() {
@@ -171,103 +192,167 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final transactions = filteredTransactions;
+    final transactions =
+        filteredTransactions;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F6),
+      backgroundColor:
+          const Color(0xFFFFF8F6),
 
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  20,
-                  20,
-                  30,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ==============================
-                    // HEADER
-                    // ==============================
+        child: SingleChildScrollView(
+          padding:
+              const EdgeInsets.fromLTRB(
+            18,
+            8,
+            18,
+            30,
+          ),
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              // =============================
+              // HEADER
+              // =============================
 
-                    _buildHeader(),
+              _buildHeader(),
 
-                    const SizedBox(height: 25),
+              const SizedBox(height: 8),
 
-                    // ==============================
-                    // ALL / INCOME / EXPENSE
-                    // ==============================
-
-                    _buildFilter(),
-
-                    const SizedBox(height: 18),
-
-                    // ==============================
-                    // MONTH SELECTOR
-                    // ==============================
-
-                    _buildMonthSelector(),
-
-                    const SizedBox(height: 22),
-
-                    // ==============================
-                    // SUMMARY
-                    // ==============================
-
-                    _buildSummary(),
-
-                    const SizedBox(height: 28),
-
-                    // ==============================
-                    // TRANSACTION TITLE
-                    // ==============================
-
-                    Row(
-                      children: [
-                        const Expanded(
-                          child: Text(
-                            'Transactions',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-
-                        Text(
-                          '${transactions.length} item${transactions.length == 1 ? '' : 's'}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF8B8583),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // ==============================
-                    // TRANSACTIONS
-                    // ==============================
-
-                    if (transactions.isEmpty)
-                      _buildEmptyState()
-                    else
-                      ...transactions.map(
-                        (transaction) =>
-                            _buildTransactionCard(
-                          transaction,
-                        ),
-                      ),
-                  ],
+              const Text(
+                'Your spending story, one '
+                'transaction at a time ✨',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF9A8D88),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 24),
+
+              // =============================
+              // FILTER
+              // =============================
+
+              _buildFilter(),
+
+              const SizedBox(height: 18),
+
+              // =============================
+              // MONTH
+              // =============================
+
+              _buildMonthSelector(),
+
+              const SizedBox(height: 20),
+
+              // =============================
+              // SUMMARY
+              // =============================
+
+              _buildSummary(),
+
+              const SizedBox(height: 28),
+
+              // =============================
+              // TRANSACTION HEADER
+              // =============================
+
+              Row(
+                children: [
+                  const Text(
+                    'Transactions',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight:
+                          FontWeight.w800,
+                      color: Color(
+                        0xFF403633,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 6),
+
+                  const Text(
+                    '🧾',
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    padding:
+                        const EdgeInsets
+                            .symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration:
+                        BoxDecoration(
+                      color:
+                          const Color(
+                        0xFFFFE9ED,
+                      ),
+                      borderRadius:
+                          BorderRadius
+                              .circular(
+                        20,
+                      ),
+                    ),
+                    child: Text(
+                      '${transactions.length} '
+                      '${transactions.length == 1 ? 'item' : 'items'}',
+                      style:
+                          const TextStyle(
+                        fontSize: 10.5,
+                        color: Color(
+                          0xFFA56570,
+                        ),
+                        fontWeight:
+                            FontWeight
+                                .w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 5),
+
+              Text(
+                selectedMonthLabel,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color:
+                      Color(0xFF9A8D88),
+                  fontWeight:
+                      FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: 14),
+
+              // =============================
+              // TRANSACTION LIST
+              // =============================
+
+              if (transactions.isEmpty)
+                _buildEmptyState()
+              else
+                ...transactions.map(
+                  (transaction) =>
+                      _buildTransactionCard(
+                    transaction,
+                  ),
+                ),
+
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );
@@ -278,22 +363,45 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
 
   Widget _buildHeader() {
-    return const Row(
+    return Row(
       children: [
-        Text(
+        const Text(
           'MyXpenses',
           style: TextStyle(
             fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF51423E),
+            fontWeight:
+                FontWeight.w800,
+            color: Color(
+              0xFF51423E,
+            ),
           ),
         ),
 
-        Spacer(),
+        const Spacer(),
 
-        Icon(
-          Icons.receipt_long_outlined,
-          color: Color(0xFF74B9A8),
+        Container(
+          width: 43,
+          height: 43,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color:
+                const Color(
+              0xFFFFE8ED,
+            ),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color:
+                  const Color(
+                0xFFF6D7DC,
+              ),
+            ),
+          ),
+          child: const Text(
+            '🧾',
+            style: TextStyle(
+              fontSize: 21,
+            ),
+          ),
         ),
       ],
     );
@@ -305,25 +413,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildFilter() {
     return Container(
-      padding: const EdgeInsets.all(4),
-
+      padding:
+          const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: const Color(0xFFECE2E0),
-        borderRadius: BorderRadius.circular(30),
+        color:
+            const Color(0xFFEDE4E2),
+        borderRadius:
+            BorderRadius.circular(30),
       ),
-
       child: Row(
         children: [
-          _filterButton('All'),
-          _filterButton('Income'),
-          _filterButton('Expense'),
+          _filterButton(
+            title: 'All',
+            emoji: '✨',
+          ),
+          _filterButton(
+            title: 'Income',
+            emoji: '💚',
+          ),
+          _filterButton(
+            title: 'Expense',
+            emoji: '🌸',
+          ),
         ],
       ),
     );
   }
 
-  Widget _filterButton(String title) {
-    final selected = selectedFilter == title;
+  Widget _filterButton({
+    required String title,
+    required String emoji,
+  }) {
+    final bool selected =
+        selectedFilter == title;
 
     return Expanded(
       child: GestureDetector(
@@ -332,36 +454,72 @@ class _HistoryScreenState extends State<HistoryScreen> {
             selectedFilter = title;
           });
         },
-
         child: AnimatedContainer(
-          duration: const Duration(
+          duration:
+              const Duration(
             milliseconds: 200,
           ),
-
-          padding: const EdgeInsets.symmetric(
-            vertical: 11,
+          padding:
+              const EdgeInsets.symmetric(
+            vertical: 12,
           ),
-
           decoration: BoxDecoration(
             color: selected
-                ? const Color(0xFF74B9A8)
+                ? const Color(
+                    0xFFFFD9DE,
+                  )
                 : Colors.transparent,
-
-            borderRadius: BorderRadius.circular(25),
-          ),
-
-          child: Text(
-            title,
-
-            textAlign: TextAlign.center,
-
-            style: TextStyle(
-              color: selected
-                  ? const Color(0xFF174F43)
-                  : const Color(0xFF6D6260),
-
-              fontWeight: FontWeight.w700,
+            borderRadius:
+                BorderRadius.circular(
+              25,
             ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: const Color(
+                        0xFFE9AAB3,
+                      ).withOpacity(
+                        0.15,
+                      ),
+                      blurRadius: 8,
+                      offset:
+                          const Offset(
+                        0,
+                        3,
+                      ),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              Text(
+                emoji,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+
+              const SizedBox(width: 5),
+
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight:
+                      FontWeight.w700,
+                  color: selected
+                      ? const Color(
+                          0xFF925760,
+                        )
+                      : const Color(
+                          0xFF746966,
+                        ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -373,53 +531,60 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
 
   Widget _buildMonthSelector() {
-    return Container(
-      height: 56,
-
-      padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-      ),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-
-      child: Row(
-        children: [
-          // ==============================
-          // PREVIOUS
-          // ==============================
-
-          IconButton(
-            onPressed: previousMonth,
-            icon: const Icon(
+    return Row(
+      children: [
+        _monthButton(
+          icon:
               Icons.chevron_left_rounded,
-              color: Color(0xFF277765),
-              size: 27,
+          onTap: previousMonth,
+        ),
+
+        const SizedBox(width: 9),
+
+        Expanded(
+          child: Container(
+            height: 48,
+            padding:
+                const EdgeInsets
+                    .symmetric(
+              horizontal: 14,
             ),
-          ),
-
-          // ==============================
-          // MONTH
-          // ==============================
-
-          Expanded(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius:
+                  BorderRadius.circular(
+                25,
+              ),
+              border: Border.all(
+                color:
+                    const Color(
+                  0xFFF0DFDC,
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black
+                      .withOpacity(
+                    0.03,
+                  ),
+                  blurRadius: 12,
+                  offset:
+                      const Offset(
+                    0,
+                    5,
+                  ),
+                ),
+              ],
+            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment:
+                  MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.calendar_month_outlined,
-                  size: 18,
-                  color: Color(0xFF74B9A8),
+                const Text(
+                  '🗓️',
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
                 ),
 
                 const SizedBox(width: 8),
@@ -427,31 +592,69 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 Flexible(
                   child: Text(
                     selectedMonthLabel,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF51423E),
+                    overflow:
+                        TextOverflow
+                            .ellipsis,
+                    style:
+                        const TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          FontWeight.w700,
+                      color:
+                          Color(
+                        0xFF544B48,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
+        ),
 
-          // ==============================
-          // NEXT
-          // ==============================
+        const SizedBox(width: 9),
 
-          IconButton(
-            onPressed: nextMonth,
-            icon: const Icon(
+        _monthButton(
+          icon:
               Icons.chevron_right_rounded,
-              color: Color(0xFF277765),
-              size: 27,
+          onTap: nextMonth,
+        ),
+      ],
+    );
+  }
+
+  Widget _monthButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius:
+          BorderRadius.circular(30),
+      child: Container(
+        width: 43,
+        height: 43,
+        decoration: BoxDecoration(
+          color:
+              const Color(
+            0xFFFFE8E8,
+          ),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color:
+                const Color(
+              0xFFF5D2D2,
             ),
           ),
-        ],
+        ),
+        child: Icon(
+          icon,
+          color:
+              const Color(
+            0xFFB56C6C,
+          ),
+          size: 25,
+        ),
       ),
     );
   }
@@ -461,75 +664,227 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
 
   Widget _buildSummary() {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _summaryCard(
-            title: 'Total Income',
-            amount: totalIncome,
-            background: const Color(0xFFDFF3EB),
-            textColor: const Color(0xFF347B69),
-            icon: Icons.arrow_downward_rounded,
+        // Balance
+        Container(
+          width: double.infinity,
+          padding:
+              const EdgeInsets
+                  .symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          decoration: BoxDecoration(
+            gradient:
+                const LinearGradient(
+              colors: [
+                Color(0xFFDDF3EB),
+                Color(0xFFF0FBF7),
+              ],
+            ),
+            borderRadius:
+                BorderRadius.circular(
+              22,
+            ),
+            border: Border.all(
+              color:
+                  const Color(
+                0xFFCDEAE0,
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 43,
+                height: 43,
+                alignment:
+                    Alignment.center,
+                decoration:
+                    BoxDecoration(
+                  color:
+                      Colors.white
+                          .withOpacity(
+                    0.85,
+                  ),
+                  borderRadius:
+                      BorderRadius
+                          .circular(
+                    14,
+                  ),
+                ),
+                child: const Text(
+                  '💰',
+                  style: TextStyle(
+                    fontSize: 22,
+                  ),
+                ),
+              ),
+
+              const SizedBox(
+                width: 12,
+              ),
+
+              const Expanded(
+                child: Text(
+                  'Monthly Balance',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(
+                      0xFF55746A,
+                    ),
+                    fontWeight:
+                        FontWeight
+                            .w600,
+                  ),
+                ),
+              ),
+
+              Text(
+                'RM ${monthBalance.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight:
+                      FontWeight.w800,
+                  color:
+                      monthBalance >= 0
+                          ? const Color(
+                              0xFF277765,
+                            )
+                          : const Color(
+                              0xFFA64E4E,
+                            ),
+                ),
+              ),
+            ],
           ),
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(height: 12),
 
-        Expanded(
-          child: _summaryCard(
-            title: 'Total Expenses',
-            amount: totalExpense,
-            background: const Color(0xFFFFE5E5),
-            textColor: const Color(0xFFA64E4E),
-            icon: Icons.arrow_upward_rounded,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _summaryCard(
+                emoji: '💚',
+                title:
+                    'Total Income',
+                amount:
+                    totalIncome,
+                background:
+                    const Color(
+                  0xFFE1F4EC,
+                ),
+                textColor:
+                    const Color(
+                  0xFF347B69,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: _summaryCard(
+                emoji: '🌸',
+                title:
+                    'Total Expenses',
+                amount:
+                    totalExpense,
+                background:
+                    const Color(
+                  0xFFFFE6E8,
+                ),
+                textColor:
+                    const Color(
+                  0xFFA64E4E,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
   Widget _summaryCard({
+    required String emoji,
     required String title,
     required double amount,
     required Color background,
     required Color textColor,
-    required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
-
+      padding:
+          const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius:
+            BorderRadius.circular(20),
+        border: Border.all(
+          color:
+              textColor.withOpacity(
+            0.08,
+          ),
+        ),
       ),
-
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: textColor,
-            size: 20,
-          ),
-
-          const SizedBox(height: 5),
-
-          Text(
-            title,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 12,
+          Container(
+            width: 38,
+            height: 38,
+            alignment:
+                Alignment.center,
+            decoration:
+                BoxDecoration(
+              color:
+                  Colors.white
+                      .withOpacity(
+                0.75,
+              ),
+              shape:
+                  BoxShape.circle,
+            ),
+            child: Text(
+              emoji,
+              style:
+                  const TextStyle(
+                fontSize: 19,
+              ),
             ),
           ),
 
-          const SizedBox(height: 5),
+          const SizedBox(
+            height: 7,
+          ),
+
+          Text(
+            title,
+            textAlign:
+                TextAlign.center,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 11,
+              fontWeight:
+                  FontWeight.w600,
+            ),
+          ),
+
+          const SizedBox(
+            height: 5,
+          ),
 
           FittedBox(
+            fit:
+                BoxFit.scaleDown,
             child: Text(
               'RM ${amount.toStringAsFixed(2)}',
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,
-                fontWeight: FontWeight.w800,
+                fontWeight:
+                    FontWeight.w800,
               ),
             ),
           ),
@@ -545,47 +900,157 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
-
-      margin: const EdgeInsets.only(top: 10),
-
-      padding: const EdgeInsets.symmetric(
-        vertical: 45,
+      margin:
+          const EdgeInsets.only(
+        top: 5,
+      ),
+      padding:
+          const EdgeInsets
+              .symmetric(
+        vertical: 36,
         horizontal: 20,
       ),
-
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        gradient:
+            const LinearGradient(
+          colors: [
+            Colors.white,
+            Color(0xFFFFF5F2),
+          ],
+        ),
+        borderRadius:
+            BorderRadius.circular(
+          24,
+        ),
+        border: Border.all(
+          color:
+              const Color(
+            0xFFF1E6E3,
+          ),
+        ),
       ),
-
       child: Column(
         children: [
-          const Text(
-            '🌱',
-            style: TextStyle(
-              fontSize: 42,
+          Container(
+            width: 70,
+            height: 70,
+            alignment:
+                Alignment.center,
+            decoration:
+                const BoxDecoration(
+              color:
+                  Color(
+                0xFFFFE9ED,
+              ),
+              shape:
+                  BoxShape.circle,
+            ),
+            child:
+                const Text(
+              '🌱',
+              style:
+                  TextStyle(
+                fontSize: 35,
+              ),
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(
+            height: 13,
+          ),
 
           Text(
-            'No transactions in $selectedMonthLabel',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+            'No transactions in '
+            '$selectedMonthLabel',
+            textAlign:
+                TextAlign.center,
+            style:
+                const TextStyle(
+              fontSize: 15,
+              fontWeight:
+                  FontWeight.w700,
+              color:
+                  Color(
+                0xFF4F4643,
+              ),
             ),
           ),
 
-          const SizedBox(height: 5),
+          const SizedBox(
+            height: 6,
+          ),
 
           const Text(
-            'Tap the + button to add a transaction.',
-            textAlign: TextAlign.center,
+            'Your wallet is having '
+            'a peaceful month ✨',
+            textAlign:
+                TextAlign.center,
             style: TextStyle(
-              color: Colors.grey,
-              fontSize: 13,
+              color:
+                  Color(
+                0xFF9A8D88,
+              ),
+              fontSize: 12,
+            ),
+          ),
+
+          const SizedBox(
+            height: 17,
+          ),
+
+          ElevatedButton(
+            onPressed:
+                widget
+                    .onAddTransaction,
+            style:
+                ElevatedButton
+                    .styleFrom(
+              elevation: 0,
+              backgroundColor:
+                  const Color(
+                0xFF77B6A5,
+              ),
+              foregroundColor:
+                  Colors.white,
+              padding:
+                  const EdgeInsets
+                      .symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape:
+                  RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius
+                        .circular(
+                  22,
+                ),
+              ),
+            ),
+            child: const Row(
+              mainAxisSize:
+                  MainAxisSize.min,
+              children: [
+                Text(
+                  '🌸',
+                  style:
+                      TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+                SizedBox(
+                  width: 7,
+                ),
+                Text(
+                  'Add Transaction',
+                  style:
+                      TextStyle(
+                    fontWeight:
+                        FontWeight
+                            .w700,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -600,13 +1065,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildTransactionCard(
     TransactionItem transaction,
   ) {
-    return Dismissible(
-      key: ValueKey(transaction.id),
+    final categoryColor =
+        getCategoryColor(
+      transaction.category,
+    );
 
-      direction: DismissDirection.endToStart,
+    return Dismissible(
+      key:
+          ValueKey(transaction.id),
+      direction:
+          DismissDirection
+              .endToStart,
 
       confirmDismiss: (_) =>
-          _confirmDelete(transaction),
+          _confirmDelete(
+        transaction,
+      ),
 
       onDismissed: (_) {
         widget.onDeleteTransaction(
@@ -614,50 +1088,57 @@ class _HistoryScreenState extends State<HistoryScreen> {
         );
       },
 
-      // ==============================
       // DELETE BACKGROUND
-      // ==============================
-
       background: Container(
-        margin: const EdgeInsets.only(
-          bottom: 10,
+        margin:
+            const EdgeInsets.only(
+          bottom: 11,
         ),
-
-        padding: const EdgeInsets.symmetric(
+        padding:
+            const EdgeInsets
+                .symmetric(
           horizontal: 22,
         ),
-
-        alignment: Alignment.centerRight,
-
+        alignment:
+            Alignment.centerRight,
         decoration: BoxDecoration(
-          color: const Color(0xFFE36C6C),
-          borderRadius: BorderRadius.circular(18),
+          color:
+              const Color(
+            0xFFE47B7B,
+          ),
+          borderRadius:
+              BorderRadius.circular(
+            20,
+          ),
         ),
-
         child: const Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment:
+              MainAxisAlignment.end,
           children: [
-            Icon(
-              Icons.delete_outline_rounded,
-              color: Colors.white,
+            Text(
+              '🗑️',
+              style:
+                  TextStyle(
+                fontSize: 19,
+              ),
             ),
 
-            SizedBox(width: 6),
+            SizedBox(width: 7),
 
             Text(
               'Delete',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+              style:
+                  TextStyle(
+                color:
+                    Colors.white,
+                fontWeight:
+                    FontWeight
+                        .w700,
               ),
             ),
           ],
         ),
       ),
-
-      // ==============================
-      // TRANSACTION
-      // ==============================
 
       child: InkWell(
         onTap: () {
@@ -665,128 +1146,233 @@ class _HistoryScreenState extends State<HistoryScreen> {
             transaction,
           );
         },
-
-        borderRadius: BorderRadius.circular(18),
-
+        borderRadius:
+            BorderRadius.circular(
+          20,
+        ),
         child: Container(
-          margin: const EdgeInsets.only(
-            bottom: 10,
+          margin:
+              const EdgeInsets.only(
+            bottom: 11,
           ),
-
-          padding: const EdgeInsets.all(14),
-
+          padding:
+              const EdgeInsets.all(
+            13,
+          ),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            color:
+                Colors.white,
+            borderRadius:
+                BorderRadius
+                    .circular(
+              20,
+            ),
+            border: Border.all(
+              color:
+                  categoryColor
+                      .withOpacity(
+                0.30,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color:
+                    categoryColor
+                        .withOpacity(
+                  0.08,
+                ),
+                blurRadius: 12,
+                offset:
+                    const Offset(
+                  0,
+                  5,
+                ),
+              ),
+            ],
           ),
-
           child: Row(
             children: [
-              // ==============================
               // EMOJI
-              // ==============================
-
               Container(
-                width: 46,
-                height: 46,
-
-                alignment: Alignment.center,
-
-                decoration: BoxDecoration(
-                  color: transaction.income
-                      ? const Color(0xFFE1F4E9)
-                      : getCategoryColor(
-                          transaction.category,
-                        ),
-
-                  shape: BoxShape.circle,
+                width: 50,
+                height: 50,
+                alignment:
+                    Alignment.center,
+                decoration:
+                    BoxDecoration(
+                  color: transaction
+                          .income
+                      ? const Color(
+                          0xFFE1F4E9,
+                        )
+                      : categoryColor,
+                  borderRadius:
+                      BorderRadius
+                          .circular(
+                    16,
+                  ),
                 ),
-
                 child: Text(
                   transaction.emoji,
-
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style:
+                      const TextStyle(
+                    fontSize: 24,
                   ),
                 ),
               ),
 
-              const SizedBox(width: 12),
+              const SizedBox(
+                width: 13,
+              ),
 
-              // ==============================
               // DETAILS
-              // ==============================
-
               Expanded(
                 child: Column(
                   crossAxisAlignment:
-                      CrossAxisAlignment.start,
-
+                      CrossAxisAlignment
+                          .start,
                   children: [
                     Text(
                       transaction.title,
-
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                      maxLines: 1,
+                      overflow:
+                          TextOverflow
+                              .ellipsis,
+                      style:
+                          const TextStyle(
+                        fontSize: 14,
+                        fontWeight:
+                            FontWeight
+                                .w700,
+                        color:
+                            Color(
+                          0xFF403633,
+                        ),
                       ),
                     ),
 
-                    const SizedBox(height: 3),
-
-                    Text(
-                      transaction.category,
-
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
+                    const SizedBox(
+                      height: 4,
                     ),
 
-                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            transaction
+                                .category,
+                            overflow:
+                                TextOverflow
+                                    .ellipsis,
+                            style:
+                                const TextStyle(
+                              color:
+                                  Color(
+                                0xFF908480,
+                              ),
+                              fontSize:
+                                  11,
+                            ),
+                          ),
+                        ),
 
-                    Text(
-                      formatDate(
-                        transaction.date,
-                      ),
+                        const Text(
+                          '  •  ',
+                          style:
+                              TextStyle(
+                            color:
+                                Color(
+                              0xFFC1B5B1,
+                            ),
+                            fontSize:
+                                10,
+                          ),
+                        ),
 
-                      style: const TextStyle(
-                        color: Color(0xFF74B9A8),
-                        fontSize: 11,
-                      ),
+                        Text(
+                          formatDate(
+                            transaction
+                                .date,
+                          ),
+                          style:
+                              const TextStyle(
+                            color:
+                                Color(
+                              0xFF74B9A8,
+                            ),
+                            fontSize:
+                                10.5,
+                            fontWeight:
+                                FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
 
-              // ==============================
-              // AMOUNT
-              // ==============================
+              const SizedBox(
+                width: 8,
+              ),
 
+              // AMOUNT
               Column(
                 crossAxisAlignment:
-                    CrossAxisAlignment.end,
-
+                    CrossAxisAlignment
+                        .end,
                 children: [
                   Text(
-                    '${transaction.income ? '+' : '-'} RM ${transaction.amount.toStringAsFixed(2)}',
-
-                    style: TextStyle(
-                      color: transaction.income
-                          ? const Color(0xFF347B69)
-                          : const Color(0xFFA64E4E),
-
-                      fontWeight: FontWeight.w800,
+                    '${transaction.income ? '+' : '-'} '
+                    'RM ${transaction.amount.toStringAsFixed(2)}',
+                    style:
+                        TextStyle(
+                      color: transaction
+                              .income
+                          ? const Color(
+                              0xFF347B69,
+                            )
+                          : const Color(
+                              0xFFA64E4E,
+                            ),
+                      fontWeight:
+                          FontWeight
+                              .w800,
                       fontSize: 13,
                     ),
                   ),
 
-                  const SizedBox(height: 5),
+                  const SizedBox(
+                    height: 6,
+                  ),
 
-                  const Icon(
-                    Icons.edit_outlined,
-                    size: 15,
-                    color: Color(0xFFB6B0AE),
+                  Container(
+                    width: 29,
+                    height: 25,
+                    alignment:
+                        Alignment.center,
+                    decoration:
+                        BoxDecoration(
+                      color:
+                          const Color(
+                        0xFFFFF1F1,
+                      ),
+                      borderRadius:
+                          BorderRadius
+                              .circular(
+                        9,
+                      ),
+                    ),
+                    child:
+                        const Icon(
+                      Icons
+                          .edit_outlined,
+                      size: 14,
+                      color:
+                          Color(
+                        0xFFB58C8C,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -804,49 +1390,191 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<bool> _confirmDelete(
     TransactionItem transaction,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed =
+        await showDialog<bool>(
       context: context,
-
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text(
-            'Delete transaction?',
-          ),
-
-          content: Text(
-            'This will permanently delete "${transaction.title}".',
-          ),
-
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(
-                  dialogContext,
-                  false,
-                );
-              },
-
-              child: const Text(
-                'Cancel',
+      builder: (
+        dialogContext,
+      ) {
+        return Dialog(
+          backgroundColor:
+              Colors.transparent,
+          child: Container(
+            padding:
+                const EdgeInsets.all(
+              22,
+            ),
+            decoration:
+                BoxDecoration(
+              color:
+                  const Color(
+                0xFFFFF8F6,
+              ),
+              borderRadius:
+                  BorderRadius
+                      .circular(
+                28,
               ),
             ),
-
-            TextButton(
-              onPressed: () {
-                Navigator.pop(
-                  dialogContext,
-                  true,
-                );
-              },
-
-              child: const Text(
-                'Delete',
-                style: TextStyle(
-                  color: Color(0xFFE36C6C),
+            child: Column(
+              mainAxisSize:
+                  MainAxisSize.min,
+              children: [
+                Container(
+                  width: 65,
+                  height: 65,
+                  alignment:
+                      Alignment.center,
+                  decoration:
+                      const BoxDecoration(
+                    color:
+                        Color(
+                      0xFFFFE3E6,
+                    ),
+                    shape:
+                        BoxShape.circle,
+                  ),
+                  child:
+                      const Text(
+                    '🥺',
+                    style:
+                        TextStyle(
+                      fontSize:
+                          33,
+                    ),
+                  ),
                 ),
-              ),
+
+                const SizedBox(
+                  height: 14,
+                ),
+
+                const Text(
+                  'Delete transaction?',
+                  style:
+                      TextStyle(
+                    fontSize: 18,
+                    fontWeight:
+                        FontWeight
+                            .w800,
+                    color:
+                        Color(
+                      0xFF403633,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 8,
+                ),
+
+                Text(
+                  'Are you sure you want to delete '
+                  '"${transaction.title}"?',
+                  textAlign:
+                      TextAlign.center,
+                  style:
+                      const TextStyle(
+                    fontSize: 12,
+                    color:
+                        Color(
+                      0xFF8B7C77,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 22,
+                ),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child:
+                          OutlinedButton(
+                        onPressed: () {
+                          Navigator.pop(
+                            dialogContext,
+                            false,
+                          );
+                        },
+                        style:
+                            OutlinedButton
+                                .styleFrom(
+                          foregroundColor:
+                              const Color(
+                            0xFF756865,
+                          ),
+                          side:
+                              const BorderSide(
+                            color:
+                                Color(
+                              0xFFE6DAD7,
+                            ),
+                          ),
+                          shape:
+                              RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(
+                              18,
+                            ),
+                          ),
+                        ),
+                        child:
+                            const Text(
+                          'Keep it 🌷',
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(
+                      width: 10,
+                    ),
+
+                    Expanded(
+                      child:
+                          ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(
+                            dialogContext,
+                            true,
+                          );
+                        },
+                        style:
+                            ElevatedButton
+                                .styleFrom(
+                          elevation: 0,
+                          backgroundColor:
+                              const Color(
+                            0xFFE47B7B,
+                          ),
+                          foregroundColor:
+                              Colors.white,
+                          shape:
+                              RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(
+                              18,
+                            ),
+                          ),
+                        ),
+                        child:
+                            const Text(
+                          'Delete',
+                          style:
+                              TextStyle(
+                            fontWeight:
+                                FontWeight
+                                    .w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -858,28 +1586,44 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // CATEGORY COLOR
   // =========================================================
 
-  Color getCategoryColor(String category) {
+  Color getCategoryColor(
+    String category,
+  ) {
     switch (category) {
       case 'Food':
-        return const Color(0xFFFFE8C8);
+        return const Color(
+          0xFFFFE8C8,
+        );
 
       case 'Transport':
-        return const Color(0xFFFFE0E4);
+        return const Color(
+          0xFFFFE0E4,
+        );
 
       case 'Shopping':
-        return const Color(0xFFE6E1FF);
+        return const Color(
+          0xFFE6E1FF,
+        );
 
       case 'Bills':
-        return const Color(0xFFFFF4BF);
+        return const Color(
+          0xFFFFF4BF,
+        );
 
       case 'Family':
-        return const Color(0xFFDFF3EB);
+        return const Color(
+          0xFFDFF3EB,
+        );
 
       case 'Health':
-        return const Color(0xFFFFDDE5);
+        return const Color(
+          0xFFFFDDE5,
+        );
 
       default:
-        return const Color(0xFFFFECE9);
+        return const Color(
+          0xFFFFECE9,
+        );
     }
   }
 
@@ -887,7 +1631,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // FORMAT DATE
   // =========================================================
 
-  String formatDate(DateTime date) {
+  String formatDate(
+    DateTime date,
+  ) {
     const shortMonths = [
       'Jan',
       'Feb',
@@ -903,6 +1649,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       'Dec',
     ];
 
-    return '${date.day} ${shortMonths[date.month - 1]} ${date.year}';
+    return '${date.day} '
+        '${shortMonths[date.month - 1]} '
+        '${date.year}';
   }
 }
