@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import 'models/transaction_item.dart';
+import 'db/app_database.dart';
 
 import 'screens/transaction_screen.dart';
 import 'screens/history_screen.dart';
@@ -9,6 +13,12 @@ import 'screens/report_screen.dart';
 import 'screens/budget_screen.dart';
 
 void main() {
+  // sqflite only talks to a real filesystem on Android/iOS/macOS.
+  // On web it needs the IndexedDB-backed ffi factory instead.
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  }
+
   runApp(const MyXpensesApp());
 }
 
@@ -56,7 +66,24 @@ class _MainScreenState extends State<MainScreen> {
   // DATA
   // ==============================
 
-  final List<TransactionItem> transactions = [];
+  List<TransactionItem> transactions = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final loaded = await AppDatabase.instance.getTransactions();
+
+    setState(() {
+      transactions = loaded;
+      _loading = false;
+    });
+  }
 
   // ==============================
   // ADD TRANSACTION
@@ -71,6 +98,8 @@ class _MainScreenState extends State<MainScreen> {
     );
 
     if (result != null) {
+      await AppDatabase.instance.insertTransaction(result);
+
       setState(() {
         transactions.add(result);
 
@@ -142,6 +171,17 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFFFF8F6),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF277765),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: getCurrentScreen(),
 

@@ -29,4 +29,24 @@ class TransactionItem {
         return '💸';
     }
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'category': category,
+      'amount': amount,
+      'income': income ? 1 : 0,
+      'date': date.toIso8601String(),
+    };
+  }
+
+  factory TransactionItem.fromMap(Map<String, dynamic> map) {
+    return TransactionItem(
+      title: map['title'] as String,
+      category: map['category'] as String,
+      amount: map['amount'] as double,
+      income: (map['income'] as int) == 1,
+      date: DateTime.parse(map['date'] as String),
+    );
+  }
 }
