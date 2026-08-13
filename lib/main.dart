@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'models/transaction_item.dart';
+import 'db/app_database.dart';
 
 import 'screens/transaction_screen.dart';
 import 'screens/history_screen.dart';
@@ -56,7 +57,24 @@ class _MainScreenState extends State<MainScreen> {
   // DATA
   // ==============================
 
-  final List<TransactionItem> transactions = [];
+  List<TransactionItem> transactions = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final loaded = await AppDatabase.instance.getTransactions();
+
+    setState(() {
+      transactions = loaded;
+      _loading = false;
+    });
+  }
 
   // ==============================
   // ADD TRANSACTION
@@ -71,6 +89,8 @@ class _MainScreenState extends State<MainScreen> {
     );
 
     if (result != null) {
+      await AppDatabase.instance.insertTransaction(result);
+
       setState(() {
         transactions.add(result);
 
@@ -142,6 +162,17 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFFFF8F6),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF277765),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: getCurrentScreen(),
 
