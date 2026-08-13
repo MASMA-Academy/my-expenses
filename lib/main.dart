@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 import 'models/transaction_item.dart';
 import 'db/app_database.dart';
@@ -10,6 +13,12 @@ import 'screens/report_screen.dart';
 import 'screens/budget_screen.dart';
 
 void main() {
+  // sqflite only talks to a real filesystem on Android/iOS/macOS.
+  // On web it needs the IndexedDB-backed ffi factory instead.
+  if (kIsWeb) {
+    databaseFactory = databaseFactoryFfiWeb;
+  }
+
   runApp(const MyXpensesApp());
 }
 
