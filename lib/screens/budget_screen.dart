@@ -139,6 +139,24 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   // =========================================================
+  // SORTED CATEGORIES (by percent used, descending)
+  // =========================================================
+
+  List<BudgetCategory> get _sortedCategories {
+    final list = List<BudgetCategory>.from(_categories);
+    list.sort((a, b) {
+      final aLimit = a.limit;
+      final bLimit = b.limit;
+
+      final aPercent = aLimit == 0.0 ? 0.0 : _getCategorySpent(a.title) / aLimit;
+      final bPercent = bLimit == 0.0 ? 0.0 : _getCategorySpent(b.title) / bLimit;
+
+      return bPercent.compareTo(aPercent);
+    });
+    return list;
+  }
+
+  // =========================================================
   // MONTH NAVIGATION
   // =========================================================
 
@@ -512,20 +530,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8F6),
 
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: const Color(0xFFFFF8F6),
-        foregroundColor: const Color(0xFF403633),
-        title: const Text(
-          'Budget',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
@@ -537,6 +541,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildHeader(),
+
+              const SizedBox(height: 25),
+
               _buildMonthSelector(),
 
               const SizedBox(height: 18),
@@ -571,7 +579,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
               const SizedBox(height: 14),
 
-              ..._categories.map(
+              ..._sortedCategories.map(
                 (category) => _buildCategoryRow(category),
               ),
             ],
@@ -580,6 +588,29 @@ class _BudgetScreenState extends State<BudgetScreen> {
       ),
     );
   }
+
+  Widget _buildHeader() {
+    return const Row(
+      children: [
+        Text(
+          'MyXpenses',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF51423E),
+          ),
+        ),
+
+        Spacer(),
+
+        Icon(
+          Icons.receipt_long_outlined,
+          color: Color(0xFF74B9A8),
+        ),
+      ],
+    );
+  }
+
 
   // =========================================================
   // MONTH SELECTOR
@@ -758,7 +789,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 ),
                 child: const Center(
                   child: Text(
-                    '💰',
+                    '💖',
                     style: TextStyle(
                       fontSize: 46,
                     ),
