@@ -57,10 +57,29 @@ class AppDatabase {
     return rows.map(TransactionItem.fromMap).toList();
   }
 
-  Future<void> insertTransaction(TransactionItem item) async {
+  Future<TransactionItem> insertTransaction(TransactionItem item) async {
     final db = await _db;
 
-    await db.insert('transactions', item.toMap());
+    final id = await db.insert('transactions', item.toMap());
+
+    return item.copyWith(id: id);
+  }
+
+  Future<void> updateTransaction(TransactionItem item) async {
+    final db = await _db;
+
+    await db.update(
+      'transactions',
+      item.toMap(),
+      where: 'id = ?',
+      whereArgs: [item.id],
+    );
+  }
+
+  Future<void> deleteTransaction(int id) async {
+    final db = await _db;
+
+    await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
   }
 
   // =========================================================
