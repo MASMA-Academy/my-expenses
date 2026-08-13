@@ -119,10 +119,11 @@ class _MainScreenState extends State<MainScreen> {
           onAddTransaction: openAddTransaction,
         );
 
-      // case 4:
-      //   return BudgetScreen(
-      //     transactions: transactions,
-      //   );
+      case 4:
+        return BudgetScreen(
+          transactions: transactions,
+          onAddTransaction: openAddTransaction,
+        );
 
       default:
         return DashboardScreen(
