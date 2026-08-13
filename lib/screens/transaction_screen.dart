@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/transaction_item.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final TransactionItem? existing;
+
+  const AddTransactionScreen({super.key, this.existing});
 
   @override
   State<AddTransactionScreen> createState() =>
@@ -59,6 +61,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    final existing = widget.existing;
+
+    if (existing != null) {
+      titleController.text = existing.title;
+      amountController.text = existing.amount.toStringAsFixed(2);
+      isIncome = existing.income;
+      selectedCategory = existing.category;
+      selectedDate = existing.date;
+    }
+  }
+
+  @override
   void dispose() {
     amountController.dispose();
     titleController.dispose();
@@ -111,6 +128,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
 
     final transaction = TransactionItem(
+      id: widget.existing?.id,
       title: title,
       category: selectedCategory,
       amount: amount,
@@ -235,9 +253,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         elevation: 0,
         centerTitle: true,
         foregroundColor: Colors.black,
-        title: const Text(
-          'Add Transaction',
-          style: TextStyle(
+        title: Text(
+          widget.existing != null ? 'Edit Transaction' : 'Add Transaction',
+          style: const TextStyle(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -537,9 +555,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: const Text(
-                    'Save Transaction',
-                    style: TextStyle(
+                  child: Text(
+                    widget.existing != null
+                        ? 'Update Transaction'
+                        : 'Save Transaction',
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w500,
                     ),
