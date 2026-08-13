@@ -13,22 +13,84 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final amountController = TextEditingController();
   final titleController = TextEditingController();
+  final noteController = TextEditingController();
 
   bool isIncome = false;
-  String selectedCategory = 'Food';
 
-  final List<String> categories = [
+  String selectedCategory = 'Food';
+  String selectedPaymentMethod = 'Cash';
+  String selectedWallet = 'Cash';
+
+  DateTime selectedDate = DateTime.now();
+
+  final List<String> expenseCategories = [
     'Food',
     'Transport',
     'Shopping',
     'Bills',
+    'Family',
+    'Health',
+    'Others',
   ];
+
+  final List<String> incomeCategories = [
+    'Salary',
+    'Allowance',
+    'Freelance',
+    'Bonus',
+    'Others',
+  ];
+
+  final List<String> paymentMethods = [
+    'Cash',
+    'Card',
+    'E-wallet',
+  ];
+
+  final List<String> wallets = [
+    'Cash',
+    'Maybank',
+    'TnG E-Wallet',
+    'ShopeePay',
+  ];
+
+  List<String> get currentCategories {
+    return isIncome ? incomeCategories : expenseCategories;
+  }
 
   @override
   void dispose() {
     amountController.dispose();
     titleController.dispose();
+    noteController.dispose();
     super.dispose();
+  }
+
+  void changeType(bool income) {
+    setState(() {
+      isIncome = income;
+
+      if (isIncome) {
+        selectedCategory = incomeCategories.first;
+      } else {
+        selectedCategory = expenseCategories.first;
+      }
+    });
+  }
+
+  Future<void> selectDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        selectedDate = pickedDate;
+      });
+    }
   }
 
   void saveTransaction() {
@@ -50,10 +112,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     final transaction = TransactionItem(
       title: title,
-      category: isIncome ? 'Income' : selectedCategory,
+      category: selectedCategory,
       amount: amount,
       income: isIncome,
-      date: DateTime.now(),
+      date: selectedDate,
+
+      // Kalau model TransactionItem kau belum ada field ni,
+      // jangan masukkan dulu.
+      //
+      // paymentMethod: selectedPaymentMethod,
+      // wallet: selectedWallet,
+      // note: noteController.text.trim(),
     );
 
     Navigator.pop(
@@ -70,161 +139,273 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF8F6),
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: const Color(0xFFFFF8F6),
-        title: const Text(
-          'Add Transaction',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
+  InputDecoration inputDecoration({
+    String? hint,
+    Widget? prefixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: prefixIcon,
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 18,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Color(0xFFE1D8D5),
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Color(0xFFE1D8D5),
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(
+          color: Color(0xFF277765),
+          width: 1.5,
+        ),
+      ),
+    );
+  }
+
+  Widget label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget transactionTypeButton({
+    required String title,
+    required bool income,
+  }) {
+    final selected = isIncome == income;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => changeType(income),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(
+            vertical: 15,
+          ),
+          decoration: BoxDecoration(
+            color: selected
+                ? const Color(0xFFF8CCCC)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight:
+                    selected ? FontWeight.bold : FontWeight.normal,
+                color: selected
+                    ? const Color(0xFF7B3636)
+                    : Colors.black87,
+              ),
+            ),
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          22,
-          20,
-          22,
-          30,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF9F7),
+
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFFF9F7),
+        elevation: 0,
+        centerTitle: true,
+        foregroundColor: Colors.black,
+        title: const Text(
+          'Add Transaction',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      ),
 
-            const SizedBox(height: 30),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            24,
+            20,
+            24,
+            40,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
 
-             Center(
-                child: Image.asset(
-                  'assets/images/logoexpenses.png',
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
+              Center(
+                child: Container(
+                  width: double.infinity,
+                  height: 180,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E7),
+                    borderRadius: BorderRadius.circular(26),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 30,
+                        offset: const Offset(0, 12),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFFF2B6B6).withOpacity(0.15),
+                        blurRadius: 25,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      // decorative sparkle kiri
+                      Positioned(
+                        left: 22,
+                        top: 25,
+                        child: Icon(
+                          Icons.auto_awesome,
+                          size: 20,
+                          color: const Color(0xFFFFC95A)
+                              .withOpacity(0.8),
+                        ),
+                      ),
+
+                      // decorative sparkle kanan
+                      Positioned(
+                        right: 25,
+                        top: 35,
+                        child: Icon(
+                          Icons.auto_awesome,
+                          size: 16,
+                          color: const Color(0xFFF4A6B5)
+                              .withOpacity(0.8),
+                        ),
+                      ),
+
+                      // small decorative circle
+                      Positioned(
+                        left: 35,
+                        bottom: 30,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xFF9EDBCB),
+                          ),
+                        ),
+                      ),
+
+                      // main image
+                      Transform.translate(
+                        offset: const Offset(0, -6),
+                        child: Image.asset(
+                          'assets/images/transaction.png',
+                          width: 250,
+                          height: 165,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
+              const SizedBox(height: 20),
 
-            _buildTransactionType(),
-            
-
-            const SizedBox(height: 50),
-
-            const Text(
-              'Amount',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            TextField(
-              controller: amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-              decoration: InputDecoration(
-                hintText: '0.00',
-                prefixText: 'RM ',
-                prefixStyle: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF277765),
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFE5E3),
+                  borderRadius: BorderRadius.circular(35),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.all(18),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none,
+                child: Row(
+                  children: [
+                    transactionTypeButton(
+                      title: 'Expense',
+                      income: false,
+                    ),
+                    transactionTypeButton(
+                      title: 'Income',
+                      income: true,
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            const SizedBox(height: 22),
+              const SizedBox(height: 30),
 
-            const Text(
-              'Title',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+              label('Amount (RM)'),
 
-            const SizedBox(height: 8),
-
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(
-                hintText: isIncome
-                    ? 'Example: Salary'
-                    : 'Example: Lunch',
-
-                prefixIcon: const Icon(
-                  Icons.edit_outlined,
+              TextField(
+                controller: amountController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-
-                filled: true,
-                fillColor: Colors.white,
-
-                contentPadding: const EdgeInsets.all(18),
-
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none,
+                decoration: inputDecoration(
+                  hint: '0.00',
                 ),
               ),
-            ),
 
-            if (!isIncome) ...[
               const SizedBox(height: 22),
 
-              const Text(
-                'Category',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+              label('Title'),
+
+              TextField(
+                controller: titleController,
+                decoration: inputDecoration(
+                  hint: isIncome
+                      ? 'e.g. Salary'
+                      : 'e.g. Lunch, Petrol',
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 22),
+
+              label('Category'),
 
               DropdownButtonFormField<String>(
-                initialValue: selectedCategory,
-
-                decoration: InputDecoration(
+                value: selectedCategory,
+                decoration: inputDecoration(
                   prefixIcon: const Icon(
                     Icons.category_outlined,
                   ),
-
-                  filled: true,
-                  fillColor: Colors.white,
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none,
-                  ),
                 ),
-
-                items: categories.map((category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(
-                      '${categoryEmoji(category)}  $category',
-                    ),
-                  );
-                }).toList(),
-
+                items: currentCategories.map(
+                  (category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(
+                        '${categoryEmoji(category)}  $category',
+                      ),
+                    );
+                  },
+                ).toList(),
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
@@ -233,148 +414,156 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   }
                 },
               ),
-            ],
 
-            const SizedBox(height: 22),
+              const SizedBox(height: 22),
 
-            const Text(
-              'Date',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+              label('Date'),
 
-            const SizedBox(height: 8),
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.calendar_month_outlined,
-                    color: Color(0xFF74B9A8),
+              InkWell(
+                onTap: selectDate,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
                   ),
-
-                  SizedBox(width: 12),
-
-                  Text(
-                    'Today',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFE1D8D5),
                     ),
                   ),
-                ],
-              ),
-            ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_month_outlined,
+                        color: Color(0xFF277765),
+                      ),
 
-            const SizedBox(height: 35),
+                      const SizedBox(width: 12),
 
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: saveTransaction,
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF277765),
-                  foregroundColor: Colors.white,
-
-                  elevation: 0,
-
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-
-                child: const Text(
-                  'Save Transaction',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                      Text(
+                        '${selectedDate.day.toString().padLeft(2, '0')}/'
+                        '${selectedDate.month.toString().padLeft(2, '0')}/'
+                        '${selectedDate.year}',
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildTransactionType() {
-    return Container(
-      padding: const EdgeInsets.all(4),
+              const SizedBox(height: 22),
 
-      decoration: BoxDecoration(
-        color: const Color(0xFFECE2E0),
-        borderRadius: BorderRadius.circular(30),
-      ),
+              label('Payment Method'),
 
-      child: Row(
-        children: [
-          _typeButton(
-            title: 'Expense',
-            income: false,
-          ),
+              DropdownButtonFormField<String>(
+                value: selectedPaymentMethod,
+                decoration: inputDecoration(
+                  prefixIcon: const Icon(
+                    Icons.payment_outlined,
+                  ),
+                ),
+                items: paymentMethods.map(
+                  (method) {
+                    return DropdownMenuItem(
+                      value: method,
+                      child: Text(method),
+                    );
+                  },
+                ).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      selectedPaymentMethod = value;
+                    });
+                  }
+                },
+              ),
 
-          _typeButton(
-            title: 'Income',
-            income: true,
-          ),
-        ],
-      ),
-    );
-  }
+              const SizedBox(height: 22),
 
-  Widget _typeButton({
-    required String title,
-    required bool income,
-  }) {
-    final selected = isIncome == income;
+              label('Wallet'),
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            isIncome = income;
-          });
-        },
+              DropdownButtonFormField<String>(
+                value: selectedWallet,
+                decoration: inputDecoration(
+                  prefixIcon: const Icon(
+                    Icons.account_balance_wallet_outlined,
+                  ),
+                ),
+                items: wallets.map(
+                  (wallet) {
+                    return DropdownMenuItem(
+                      value: wallet,
+                      child: Text(wallet),
+                    );
+                  },
+                ).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      selectedWallet = value;
+                    });
+                  }
+                },
+              ),
 
-        child: AnimatedContainer(
-          duration: const Duration(
-            milliseconds: 200,
-          ),
+              const SizedBox(height: 22),
 
-          padding: const EdgeInsets.symmetric(
-            vertical: 12,
-          ),
+              label('Note (optional)'),
 
-          decoration: BoxDecoration(
-            color: selected
-                ? const Color(0xFF74B9A8)
-                : Colors.transparent,
+              TextField(
+                controller: noteController,
+                maxLines: 4,
+                decoration: inputDecoration(
+                  hint: 'Add a note...',
+                ),
+              ),
 
-            borderRadius: BorderRadius.circular(25),
-          ),
+              const SizedBox(height: 35),
 
-          child: Text(
-            title,
+              SizedBox(
+                width: double.infinity,
+                height: 58,
+                child: ElevatedButton(
+                  onPressed: saveTransaction,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF277765),
+                    foregroundColor: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save Transaction',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
 
-            textAlign: TextAlign.center,
+              const SizedBox(height: 15),
 
-            style: TextStyle(
-              color: selected
-                  ? const Color(0xFF174F43)
-                  : const Color(0xFF6D6260),
-
-              fontWeight: FontWeight.w700,
-            ),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -394,6 +583,24 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       case 'Bills':
         return '💡';
+
+      case 'Family':
+        return '👨‍👩‍👧';
+
+      case 'Health':
+        return '❤️';
+
+      case 'Salary':
+        return '💰';
+
+      case 'Allowance':
+        return '💵';
+
+      case 'Freelance':
+        return '💻';
+
+      case 'Bonus':
+        return '🎁';
 
       default:
         return '💸';
