@@ -516,7 +516,7 @@ class _ReportScreenState extends State<ReportScreen> {
             labelColor: const Color(0xFF347B69),
           ),
           _incomeExpenseBar(
-            emoji: '🐷',
+            emoji: '📉',
             label: 'Expense',
             amount: _totalExpense,
             barHeight: maxBarHeight * (_totalExpense / maxValue),
