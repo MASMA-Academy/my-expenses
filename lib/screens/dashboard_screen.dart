@@ -290,20 +290,6 @@ class DashboardScreen extends StatelessWidget {
             color: Color(0xFF277765),
           ),
         ),
-
-        Container(
-          width: 42,
-          height: 42,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF4ECEA),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: Color(0xFF277765),
-            size: 24,
-          ),
-        ),
       ],
     );
   }
