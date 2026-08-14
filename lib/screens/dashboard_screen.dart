@@ -10,6 +10,7 @@ class DashboardScreen extends StatelessWidget {
   final VoidCallback onOpenHistory;
   final void Function(TransactionItem transaction) onEditTransaction;
   final Future<void> Function() onReload;
+  final VoidCallback onManageLock;
 
   // =========================================================
   // CURRENT GREETING
@@ -99,6 +100,7 @@ class DashboardScreen extends StatelessWidget {
     required this.onOpenHistory,
     required this.onEditTransaction,
     required this.onReload,
+    required this.onManageLock,
   });
 
   List<TransactionItem> get currentMonthTransactions {
@@ -282,6 +284,14 @@ class DashboardScreen extends StatelessWidget {
         ),
 
         const Spacer(),
+
+        IconButton(
+          onPressed: onManageLock,
+          icon: const Icon(
+            Icons.lock_outline_rounded,
+            color: Color(0xFF277765),
+          ),
+        ),
 
         IconButton(
           onPressed: onReload,

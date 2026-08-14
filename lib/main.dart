@@ -11,6 +11,8 @@ import 'screens/history_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/budget_screen.dart';
+import 'screens/pin_lock_screen.dart';
+import 'utils/app_lock.dart';
 
 void main() {
   // sqflite only talks to a real filesystem on Android/iOS/macOS.
@@ -67,12 +69,26 @@ class _MainScreenState extends State<MainScreen> {
   List<TransactionItem> transactions = [];
   List<String> customCategoryNames = [];
   bool _loading = true;
+  bool _locked = false;
+  bool _hasPin = false;
 
   @override
   void initState() {
     super.initState();
 
     _loadTransactions();
+    _checkLock();
+  }
+
+  Future<void> _checkLock() async {
+    final hasPin = await AppLock.hasPinSet();
+
+    if (!mounted) return;
+
+    setState(() {
+      _hasPin = hasPin;
+      _locked = hasPin;
+    });
   }
 
   Future<void> _loadTransactions() async {
@@ -205,6 +221,267 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // ==============================
+  // APP LOCK
+  // ==============================
+
+  static const TextStyle _lockLabelStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+    color: Color(0xFF4F4643),
+  );
+
+  Widget _pinField(TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      obscureText: true,
+      keyboardType: TextInputType.number,
+      maxLength: 6,
+      decoration: InputDecoration(
+        counterText: '',
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  void _showManageLockSheet() {
+    final currentPinController = TextEditingController();
+    final newPinController = TextEditingController();
+    final confirmPinController = TextEditingController();
+    String? errorText;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            Future<void> saveOrUpdatePin() async {
+              if (_hasPin) {
+                final currentOk = await AppLock.verifyPin(
+                  currentPinController.text.trim(),
+                );
+
+                if (!currentOk) {
+                  setModalState(() {
+                    errorText = 'Current PIN is incorrect.';
+                  });
+                  return;
+                }
+
+                final newPin = newPinController.text.trim();
+
+                if (newPin.length < 4) {
+                  setModalState(() {
+                    errorText = 'Enter a new PIN (min 4 digits).';
+                  });
+                  return;
+                }
+
+                await AppLock.setPin(newPin);
+              } else {
+                final pin = newPinController.text.trim();
+                final confirm = confirmPinController.text.trim();
+
+                if (pin.length < 4) {
+                  setModalState(() {
+                    errorText = 'PIN must be at least 4 digits.';
+                  });
+                  return;
+                }
+
+                if (pin != confirm) {
+                  setModalState(() {
+                    errorText = 'PINs do not match.';
+                  });
+                  return;
+                }
+
+                await AppLock.setPin(pin);
+              }
+
+              if (!mounted) return;
+
+              setState(() {
+                _hasPin = true;
+              });
+
+              Navigator.pop(sheetContext);
+
+              ScaffoldMessenger.of(this.context).showSnackBar(
+                const SnackBar(content: Text('App lock updated 🔒')),
+              );
+            }
+
+            Future<void> disableLock() async {
+              final currentOk = await AppLock.verifyPin(
+                currentPinController.text.trim(),
+              );
+
+              if (!currentOk) {
+                setModalState(() {
+                  errorText = 'Current PIN is incorrect.';
+                });
+                return;
+              }
+
+              await AppLock.clearPin();
+
+              if (!mounted) return;
+
+              setState(() {
+                _hasPin = false;
+              });
+
+              Navigator.pop(sheetContext);
+
+              ScaffoldMessenger.of(this.context).showSnackBar(
+                const SnackBar(content: Text('App lock disabled')),
+              );
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(22, 16, 22, 28),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF8F6),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 44,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE4D4D1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Center(
+                          child: Text(
+                            _hasPin ? 'App Lock' : 'Set a PIN',
+                            style: const TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF403633),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        if (_hasPin) ...[
+                          const Text('Current PIN', style: _lockLabelStyle),
+                          const SizedBox(height: 8),
+                          _pinField(currentPinController),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'New PIN (optional, to change)',
+                            style: _lockLabelStyle,
+                          ),
+                          const SizedBox(height: 8),
+                          _pinField(newPinController),
+                        ] else ...[
+                          const Text('PIN', style: _lockLabelStyle),
+                          const SizedBox(height: 8),
+                          _pinField(newPinController),
+                          const SizedBox(height: 16),
+                          const Text('Confirm PIN', style: _lockLabelStyle),
+                          const SizedBox(height: 8),
+                          _pinField(confirmPinController),
+                        ],
+
+                        if (errorText != null) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            errorText!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+
+                        const SizedBox(height: 22),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: saveOrUpdatePin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF277765),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
+                            child: Text(
+                              _hasPin ? 'Update PIN' : 'Enable Lock',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        if (_hasPin) ...[
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 54,
+                            child: OutlinedButton(
+                              onPressed: disableLock,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFA64E4E),
+                                side: const BorderSide(
+                                  color: Color(0xFFF2D3D3),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                              ),
+                              child: const Text('Disable Lock'),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ==============================
   // SCREEN
   // ==============================
 
@@ -222,6 +499,7 @@ class _MainScreenState extends State<MainScreen> {
           },
           onEditTransaction: openEditTransaction,
           onReload: _loadTransactions,
+          onManageLock: _showManageLockSheet,
         );
 
       case 1:
@@ -255,6 +533,7 @@ class _MainScreenState extends State<MainScreen> {
           },
           onEditTransaction: openEditTransaction,
           onReload: _loadTransactions,
+          onManageLock: _showManageLockSheet,
         );
     }
   }
@@ -271,6 +550,16 @@ class _MainScreenState extends State<MainScreen> {
         body: Center(
           child: CircularProgressIndicator(color: Color(0xFF277765)),
         ),
+      );
+    }
+
+    if (_locked) {
+      return PinLockScreen(
+        onUnlocked: () {
+          setState(() {
+            _locked = false;
+          });
+        },
       );
     }
 

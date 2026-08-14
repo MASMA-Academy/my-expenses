@@ -11,9 +11,7 @@ Future<String> exportTransactionsToCsv(
 ) async {
   final buffer = StringBuffer();
 
-  buffer.writeln(
-    'Date,Title,Category,Type,Amount,Payment Method,Wallet,Note',
-  );
+  buffer.writeln('Date,Title,Category,Type,Amount,Payment Method,Wallet,Note');
 
   for (final transaction in transactions) {
     buffer.writeln(
@@ -32,7 +30,7 @@ Future<String> exportTransactionsToCsv(
 
   final directory = Platform.isAndroid
       ? (await getExternalStorageDirectory() ??
-          await getApplicationDocumentsDirectory())
+            await getApplicationDocumentsDirectory())
       : await getApplicationDocumentsDirectory();
 
   final fileName =
