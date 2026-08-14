@@ -10,6 +10,7 @@ class DashboardScreen extends StatelessWidget {
   final VoidCallback onOpenHistory;
   final void Function(TransactionItem transaction) onEditTransaction;
   final Future<void> Function() onReload;
+  final VoidCallback onManageLock;
 
   // =========================================================
   // CURRENT GREETING
@@ -99,6 +100,7 @@ class DashboardScreen extends StatelessWidget {
     required this.onOpenHistory,
     required this.onEditTransaction,
     required this.onReload,
+    required this.onManageLock,
   });
 
   List<TransactionItem> get currentMonthTransactions {
@@ -284,25 +286,16 @@ class DashboardScreen extends StatelessWidget {
         const Spacer(),
 
         IconButton(
-          onPressed: onReload,
+          onPressed: onManageLock,
           icon: const Icon(
-            Icons.refresh_rounded,
+            Icons.lock_outline_rounded,
             color: Color(0xFF277765),
           ),
         ),
 
-        Container(
-          width: 42,
-          height: 42,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF4ECEA),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.notifications_none_rounded,
-            color: Color(0xFF277765),
-            size: 24,
-          ),
+        IconButton(
+          onPressed: onReload,
+          icon: const Icon(Icons.refresh_rounded, color: Color(0xFF277765)),
         ),
       ],
     );
@@ -321,7 +314,7 @@ class DashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF277765).withOpacity(0.15),
+            color: const Color(0xFF277765).withValues(alpha: 0.15),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -653,7 +646,7 @@ class DashboardScreen extends StatelessWidget {
           height: 28,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.18),
+            color: color.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(9),
           ),
           child: Text(emoji, style: const TextStyle(fontSize: 15)),
@@ -696,7 +689,7 @@ class DashboardScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(17),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.025),
+              color: Colors.black.withValues(alpha: 0.025),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),

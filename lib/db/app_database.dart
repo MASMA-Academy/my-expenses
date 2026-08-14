@@ -22,7 +22,7 @@ class AppDatabase {
 
     return openDatabase(
       dbPath,
-      version: 2,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE transactions (
@@ -32,7 +32,10 @@ class AppDatabase {
             amount REAL NOT NULL,
             income INTEGER NOT NULL,
             date TEXT NOT NULL,
-            receipt BLOB
+            receipt BLOB,
+            payment_method TEXT NOT NULL DEFAULT 'Cash',
+            wallet TEXT NOT NULL DEFAULT 'Cash',
+            note TEXT NOT NULL DEFAULT ''
           )
         ''');
 
@@ -42,12 +45,40 @@ class AppDatabase {
             budget_limit REAL NOT NULL
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE custom_categories (
+            title TEXT PRIMARY KEY,
+            emoji TEXT NOT NULL,
+            color INTEGER NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
+          await db.execute('ALTER TABLE transactions ADD COLUMN receipt BLOB');
+        }
+
+        if (oldVersion < 3) {
           await db.execute(
-            'ALTER TABLE transactions ADD COLUMN receipt BLOB',
+            "ALTER TABLE transactions ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'Cash'",
           );
+          await db.execute(
+            "ALTER TABLE transactions ADD COLUMN wallet TEXT NOT NULL DEFAULT 'Cash'",
+          );
+          await db.execute(
+            "ALTER TABLE transactions ADD COLUMN note TEXT NOT NULL DEFAULT ''",
+          );
+        }
+
+        if (oldVersion < 4) {
+          await db.execute('''
+            CREATE TABLE custom_categories (
+              title TEXT PRIMARY KEY,
+              emoji TEXT NOT NULL,
+              color INTEGER NOT NULL
+            )
+          ''');
         }
       },
     );
@@ -108,10 +139,33 @@ class AppDatabase {
   Future<void> setBudgetLimit(String category, double limit) async {
     final db = await _db;
 
-    await db.insert(
-      'budget_limits',
-      {'category': category, 'budget_limit': limit},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('budget_limits', {
+      'category': category,
+      'budget_limit': limit,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  // =========================================================
+  // CUSTOM CATEGORIES
+  // =========================================================
+
+  Future<List<Map<String, dynamic>>> getCustomCategories() async {
+    final db = await _db;
+
+    return db.query('custom_categories');
+  }
+
+  Future<void> addCustomCategory({
+    required String title,
+    required String emoji,
+    required int color,
+  }) async {
+    final db = await _db;
+
+    await db.insert('custom_categories', {
+      'title': title,
+      'emoji': emoji,
+      'color': color,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }

@@ -17,8 +17,7 @@ class ReportScreen extends StatefulWidget {
   });
 
   @override
-  State<ReportScreen> createState() =>
-      _ReportScreenState();
+  State<ReportScreen> createState() => _ReportScreenState();
 }
 
 class _ReportScreenState extends State<ReportScreen> {
@@ -77,31 +76,17 @@ class _ReportScreenState extends State<ReportScreen> {
     switch (selectedPeriod) {
       case 'Week':
         final monday = referenceDate.subtract(
-          Duration(
-            days: referenceDate.weekday - 1,
-          ),
+          Duration(days: referenceDate.weekday - 1),
         );
 
-        return DateTime(
-          monday.year,
-          monday.month,
-          monday.day,
-        );
+        return DateTime(monday.year, monday.month, monday.day);
 
       case 'Year':
-        return DateTime(
-          referenceDate.year,
-          1,
-          1,
-        );
+        return DateTime(referenceDate.year, 1, 1);
 
       case 'Month':
       default:
-        return DateTime(
-          referenceDate.year,
-          referenceDate.month,
-          1,
-        );
+        return DateTime(referenceDate.year, referenceDate.month, 1);
     }
   }
 
@@ -117,19 +102,10 @@ class _ReportScreenState extends State<ReportScreen> {
           23,
           59,
           59,
-        ).add(
-          const Duration(days: 6),
-        );
+        ).add(const Duration(days: 6));
 
       case 'Year':
-        return DateTime(
-          referenceDate.year,
-          12,
-          31,
-          23,
-          59,
-          59,
-        );
+        return DateTime(referenceDate.year, 12, 31, 23, 59, 59);
 
       case 'Month':
       default:
@@ -139,9 +115,7 @@ class _ReportScreenState extends State<ReportScreen> {
           1,
         );
 
-        return nextMonth.subtract(
-          const Duration(seconds: 1),
-        );
+        return nextMonth.subtract(const Duration(seconds: 1));
     }
   }
 
@@ -154,9 +128,7 @@ class _ReportScreenState extends State<ReportScreen> {
       case 'Week':
         final start = _periodStart;
 
-        final end = start.add(
-          const Duration(days: 6),
-        );
+        final end = start.add(const Duration(days: 6));
 
         if (start.month == end.month) {
           return '${_shortMonths[start.month - 1]} '
@@ -187,9 +159,7 @@ class _ReportScreenState extends State<ReportScreen> {
     setState(() {
       switch (selectedPeriod) {
         case 'Week':
-          referenceDate = referenceDate.subtract(
-            const Duration(days: 7),
-          );
+          referenceDate = referenceDate.subtract(const Duration(days: 7));
           break;
 
         case 'Year':
@@ -220,9 +190,7 @@ class _ReportScreenState extends State<ReportScreen> {
     setState(() {
       switch (selectedPeriod) {
         case 'Week':
-          referenceDate = referenceDate.add(
-            const Duration(days: 7),
-          );
+          referenceDate = referenceDate.add(const Duration(days: 7));
           break;
 
         case 'Year':
@@ -280,9 +248,7 @@ class _ReportScreenState extends State<ReportScreen> {
         )
         .toList();
 
-    result.sort(
-      (a, b) => b.date.compareTo(a.date),
-    );
+    result.sort((a, b) => b.date.compareTo(a.date));
 
     return result;
   }
@@ -293,15 +259,8 @@ class _ReportScreenState extends State<ReportScreen> {
 
   double get _totalIncome {
     return _periodTransactions
-        .where(
-          (transaction) =>
-              transaction.income,
-        )
-        .fold(
-          0.0,
-          (total, transaction) =>
-              total + transaction.amount,
-        );
+        .where((transaction) => transaction.income)
+        .fold(0.0, (total, transaction) => total + transaction.amount);
   }
 
   // =========================================================
@@ -310,15 +269,8 @@ class _ReportScreenState extends State<ReportScreen> {
 
   double get _totalExpense {
     return _periodTransactions
-        .where(
-          (transaction) =>
-              !transaction.income,
-        )
-        .fold(
-          0.0,
-          (total, transaction) =>
-              total + transaction.amount,
-        );
+        .where((transaction) => !transaction.income)
+        .fold(0.0, (total, transaction) => total + transaction.amount);
   }
 
   // =========================================================
@@ -335,26 +287,20 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Map<String, double> get _categoryBreakdown {
     final Map<String, double> totals = {
-      for (final category in _knownCategories)
-        category: 0.0,
+      for (final category in _knownCategories) category: 0.0,
       'Others': 0.0,
     };
 
-    for (final transaction
-        in _periodTransactions) {
+    for (final transaction in _periodTransactions) {
       if (transaction.income) {
         continue;
       }
 
-      final key = _knownCategories.contains(
-        transaction.category,
-      )
+      final key = _knownCategories.contains(transaction.category)
           ? transaction.category
           : 'Others';
 
-      totals[key] =
-          (totals[key] ?? 0) +
-              transaction.amount;
+      totals[key] = (totals[key] ?? 0) + transaction.amount;
     }
 
     return totals;
@@ -366,25 +312,16 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final hasData =
-        _periodTransactions.isNotEmpty;
+    final hasData = _periodTransactions.isNotEmpty;
 
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFFFF8F6),
+      backgroundColor: const Color(0xFFFFF8F6),
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding:
-              const EdgeInsets.fromLTRB(
-            18,
-            8,
-            18,
-            35,
-          ),
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 35),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // =============================================
               // HEADER
@@ -396,11 +333,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
               const Text(
                 'See where your money goes ✨',
-                style: TextStyle(
-                  fontSize: 12,
-                  color:
-                      Color(0xFF9A8D88),
-                ),
+                style: TextStyle(fontSize: 12, color: Color(0xFF9A8D88)),
               ),
 
               const SizedBox(height: 24),
@@ -408,7 +341,6 @@ class _ReportScreenState extends State<ReportScreen> {
               // =============================================
               // PERIOD SELECTOR
               // =============================================
-
               _buildPeriodSelector(),
 
               const SizedBox(height: 18),
@@ -416,7 +348,6 @@ class _ReportScreenState extends State<ReportScreen> {
               // =============================================
               // DATE NAVIGATOR
               // =============================================
-
               _buildDateNavigator(),
 
               const SizedBox(height: 22),
@@ -435,7 +366,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 // =========================================
                 // CATEGORY
                 // =========================================
-
                 _buildCategoryCard(),
 
                 const SizedBox(height: 18),
@@ -443,7 +373,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 // =========================================
                 // INCOME VS EXPENSE
                 // =========================================
-
                 _buildIncomeExpenseCard(),
 
                 const SizedBox(height: 18),
@@ -451,7 +380,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 // =========================================
                 // SUMMARY
                 // =========================================
-
                 _buildSummaryCard(),
               ],
             ],
@@ -472,10 +400,8 @@ class _ReportScreenState extends State<ReportScreen> {
           'MyXpenses',
           style: TextStyle(
             fontSize: 24,
-            fontWeight:
-                FontWeight.w800,
-            color:
-                Color(0xFF51423E),
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF51423E),
           ),
         ),
 
@@ -483,10 +409,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
         IconButton(
           onPressed: widget.onReload,
-          icon: const Icon(
-            Icons.refresh_rounded,
-            color: Color(0xFF347B69),
-          ),
+          icon: const Icon(Icons.refresh_rounded, color: Color(0xFF347B69)),
         ),
 
         Container(
@@ -494,24 +417,11 @@ class _ReportScreenState extends State<ReportScreen> {
           height: 43,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color:
-                const Color(
-              0xFFE1F4EC,
-            ),
+            color: const Color(0xFFE1F4EC),
             shape: BoxShape.circle,
-            border: Border.all(
-              color:
-                  const Color(
-                0xFFCDEAE0,
-              ),
-            ),
+            border: Border.all(color: const Color(0xFFCDEAE0)),
           ),
-          child: const Text(
-            '📊',
-            style: TextStyle(
-              fontSize: 21,
-            ),
-          ),
+          child: const Text('📊', style: TextStyle(fontSize: 21)),
         ),
       ],
     );
@@ -523,41 +433,23 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _buildPeriodSelector() {
     return Container(
-      padding:
-          const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color:
-            const Color(
-          0xFFEDE4E2,
-        ),
-        borderRadius:
-            BorderRadius.circular(30),
+        color: const Color(0xFFEDE4E2),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         children: [
-          _periodButton(
-            title: 'Week',
-            emoji: '🌱',
-          ),
-          _periodButton(
-            title: 'Month',
-            emoji: '🌸',
-          ),
-          _periodButton(
-            title: 'Year',
-            emoji: '✨',
-          ),
+          _periodButton(title: 'Week', emoji: '🌱'),
+          _periodButton(title: 'Month', emoji: '🌸'),
+          _periodButton(title: 'Year', emoji: '✨'),
         ],
       ),
     );
   }
 
-  Widget _periodButton({
-    required String title,
-    required String emoji,
-  }) {
-    final selected =
-        selectedPeriod == title;
+  Widget _periodButton({required String title, required String emoji}) {
+    final selected = selectedPeriod == title;
 
     return Expanded(
       child: GestureDetector(
@@ -567,54 +459,25 @@ class _ReportScreenState extends State<ReportScreen> {
           });
         },
         child: AnimatedContainer(
-          duration:
-              const Duration(
-            milliseconds: 200,
-          ),
-          padding:
-              const EdgeInsets.symmetric(
-            vertical: 12,
-          ),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: selected
-                ? const Color(
-                    0xFFFFD9DE,
-                  )
-                : Colors.transparent,
-            borderRadius:
-                BorderRadius.circular(
-              25,
-            ),
+            color: selected ? const Color(0xFFFFD9DE) : Colors.transparent,
+            borderRadius: BorderRadius.circular(25),
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color:
-                          const Color(
-                        0xFFE9AAB3,
-                      ).withOpacity(
-                        0.15,
-                      ),
+                      color: const Color(0xFFE9AAB3).withValues(alpha: 0.15),
                       blurRadius: 8,
-                      offset:
-                          const Offset(
-                        0,
-                        3,
-                      ),
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,
           ),
           child: Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                emoji,
-                style:
-                    const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
+              Text(emoji, style: const TextStyle(fontSize: 14)),
 
               const SizedBox(width: 5),
 
@@ -622,15 +485,10 @@ class _ReportScreenState extends State<ReportScreen> {
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight:
-                      FontWeight.w700,
+                  fontWeight: FontWeight.w700,
                   color: selected
-                      ? const Color(
-                          0xFF925760,
-                        )
-                      : const Color(
-                          0xFF746966,
-                        ),
+                      ? const Color(0xFF925760)
+                      : const Color(0xFF746966),
                 ),
               ),
             ],
@@ -647,11 +505,7 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildDateNavigator() {
     return Row(
       children: [
-        _dateArrowButton(
-          icon:
-              Icons.chevron_left_rounded,
-          onTap: _goPrevious,
-        ),
+        _dateArrowButton(icon: Icons.chevron_left_rounded, onTap: _goPrevious),
 
         const SizedBox(width: 9),
 
@@ -660,74 +514,34 @@ class _ReportScreenState extends State<ReportScreen> {
             onTap: _pickDate,
             child: Container(
               height: 48,
-              padding:
-                  const EdgeInsets
-                      .symmetric(
-                horizontal: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color:
-                    Colors.white,
-                borderRadius:
-                    BorderRadius
-                        .circular(
-                  25,
-                ),
-                border: Border.all(
-                  color:
-                      const Color(
-                    0xFFF0DFDC,
-                  ),
-                ),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: const Color(0xFFF0DFDC)),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        Colors.black
-                            .withOpacity(
-                      0.03,
-                    ),
+                    color: Colors.black.withValues(alpha: 0.03),
                     blurRadius: 12,
-                    offset:
-                        const Offset(
-                      0,
-                      5,
-                    ),
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment
-                        .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    '🗓️',
-                    style:
-                        TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
+                  const Text('🗓️', style: TextStyle(fontSize: 18)),
 
-                  const SizedBox(
-                    width: 8,
-                  ),
+                  const SizedBox(width: 8),
 
                   Flexible(
                     child: Text(
                       _periodLabel,
-                      overflow:
-                          TextOverflow
-                              .ellipsis,
-                      style:
-                          const TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                         fontSize: 14,
-                        fontWeight:
-                            FontWeight
-                                .w700,
-                        color:
-                            Color(
-                          0xFF544B48,
-                        ),
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF544B48),
                       ),
                     ),
                   ),
@@ -739,11 +553,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
         const SizedBox(width: 9),
 
-        _dateArrowButton(
-          icon:
-              Icons.chevron_right_rounded,
-          onTap: _goNext,
-        ),
+        _dateArrowButton(icon: Icons.chevron_right_rounded, onTap: _goNext),
       ],
     );
   }
@@ -754,34 +564,16 @@ class _ReportScreenState extends State<ReportScreen> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius:
-          BorderRadius.circular(
-        30,
-      ),
+      borderRadius: BorderRadius.circular(30),
       child: Container(
         width: 43,
         height: 43,
         decoration: BoxDecoration(
-          color:
-              const Color(
-            0xFFFFE8E8,
-          ),
+          color: const Color(0xFFFFE8E8),
           shape: BoxShape.circle,
-          border: Border.all(
-            color:
-                const Color(
-              0xFFF5D2D2,
-            ),
-          ),
+          border: Border.all(color: const Color(0xFFF5D2D2)),
         ),
-        child: Icon(
-          icon,
-          color:
-              const Color(
-            0xFFB56C6C,
-          ),
-          size: 25,
-        ),
+        child: Icon(icon, color: const Color(0xFFB56C6C), size: 25),
       ),
     );
   }
@@ -793,50 +585,25 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildOverviewCard() {
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient:
-            const LinearGradient(
-          colors: [
-            Color(0xFFFFF1F2),
-            Color(0xFFFFFAF2),
-          ],
-          begin:
-              Alignment.topLeft,
-          end:
-              Alignment.bottomRight,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF1F2), Color(0xFFFFFAF2)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius:
-            BorderRadius.circular(
-          26,
-        ),
-        border: Border.all(
-          color:
-              const Color(
-            0xFFF2E3DF,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: const Color(0xFFF2E3DF)),
         boxShadow: [
           BoxShadow(
-            color:
-                const Color(
-              0xFFE9B4AF,
-            ).withOpacity(
-              0.13,
-            ),
+            color: const Color(0xFFE9B4AF).withValues(alpha: 0.13),
             blurRadius: 18,
-            offset:
-                const Offset(
-              0,
-              8,
-            ),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -844,59 +611,29 @@ class _ReportScreenState extends State<ReportScreen> {
                 'Overview',
                 style: TextStyle(
                   fontSize: 17,
-                  fontWeight:
-                      FontWeight.w800,
-                  color:
-                      Color(
-                    0xFF403633,
-                  ),
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF403633),
                 ),
               ),
 
               const SizedBox(width: 6),
 
-              const Text(
-                '💖',
-                style:
-                    TextStyle(
-                  fontSize: 17,
-                ),
-              ),
+              const Text('💖', style: TextStyle(fontSize: 17)),
 
               const Spacer(),
 
               Container(
-                padding:
-                    const EdgeInsets
-                        .symmetric(
-                  horizontal: 9,
-                  vertical: 5,
-                ),
-                decoration:
-                    BoxDecoration(
-                  color:
-                      Colors.white
-                          .withOpacity(
-                    0.8,
-                  ),
-                  borderRadius:
-                      BorderRadius
-                          .circular(
-                    20,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   selectedPeriod,
-                  style:
-                      const TextStyle(
+                  style: const TextStyle(
                     fontSize: 10.5,
-                    fontWeight:
-                        FontWeight
-                            .w700,
-                    color:
-                        Color(
-                      0xFF96736D,
-                    ),
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF96736D),
                   ),
                 ),
               ),
@@ -908,40 +645,24 @@ class _ReportScreenState extends State<ReportScreen> {
           Row(
             children: [
               Expanded(
-                child:
-                    _overviewMiniCard(
+                child: _overviewMiniCard(
                   emoji: '💚',
                   title: 'Income',
-                  amount:
-                      _totalIncome,
-                  background:
-                      const Color(
-                    0xFFDFF3EB,
-                  ),
-                  textColor:
-                      const Color(
-                    0xFF347B69,
-                  ),
+                  amount: _totalIncome,
+                  background: const Color(0xFFDFF3EB),
+                  textColor: const Color(0xFF347B69),
                 ),
               ),
 
               const SizedBox(width: 10),
 
               Expanded(
-                child:
-                    _overviewMiniCard(
+                child: _overviewMiniCard(
                   emoji: '🌸',
                   title: 'Expense',
-                  amount:
-                      _totalExpense,
-                  background:
-                      const Color(
-                    0xFFFFE5E7,
-                  ),
-                  textColor:
-                      const Color(
-                    0xFFA64E4E,
-                  ),
+                  amount: _totalExpense,
+                  background: const Color(0xFFFFE5E7),
+                  textColor: const Color(0xFFA64E4E),
                 ),
               ),
             ],
@@ -951,50 +672,24 @@ class _ReportScreenState extends State<ReportScreen> {
 
           Container(
             width: double.infinity,
-            padding:
-                const EdgeInsets
-                    .symmetric(
-              horizontal: 14,
-              vertical: 13,
-            ),
-            decoration:
-                BoxDecoration(
-              color:
-                  Colors.white
-                      .withOpacity(
-                0.78,
-              ),
-              borderRadius:
-                  BorderRadius
-                      .circular(
-                18,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.78),
+              borderRadius: BorderRadius.circular(18),
             ),
             child: Row(
               children: [
-                const Text(
-                  '💰',
-                  style:
-                      TextStyle(
-                    fontSize: 21,
-                  ),
-                ),
+                const Text('💰', style: TextStyle(fontSize: 21)),
 
                 const SizedBox(width: 10),
 
                 const Expanded(
                   child: Text(
                     'Balance',
-                    style:
-                        TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      fontWeight:
-                          FontWeight
-                              .w600,
-                      color:
-                          Color(
-                        0xFF716763,
-                      ),
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF716763),
                     ),
                   ),
                 ),
@@ -1003,17 +698,10 @@ class _ReportScreenState extends State<ReportScreen> {
                   'RM ${_balance.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight:
-                        FontWeight
-                            .w800,
-                    color:
-                        _balance >= 0
-                            ? const Color(
-                                0xFF277765,
-                              )
-                            : const Color(
-                                0xFFA64E4E,
-                              ),
+                    fontWeight: FontWeight.w800,
+                    color: _balance >= 0
+                        ? const Color(0xFF277765)
+                        : const Color(0xFFA64E4E),
                   ),
                 ),
               ],
@@ -1032,24 +720,14 @@ class _ReportScreenState extends State<ReportScreen> {
     required Color textColor,
   }) {
     return Container(
-      padding:
-          const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: background,
-        borderRadius:
-            BorderRadius.circular(
-          18,
-        ),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         children: [
-          Text(
-            emoji,
-            style:
-                const TextStyle(
-              fontSize: 22,
-            ),
-          ),
+          Text(emoji, style: const TextStyle(fontSize: 22)),
 
           const SizedBox(height: 5),
 
@@ -1057,8 +735,7 @@ class _ReportScreenState extends State<ReportScreen> {
             title,
             style: TextStyle(
               fontSize: 11,
-              fontWeight:
-                  FontWeight.w600,
+              fontWeight: FontWeight.w600,
               color: textColor,
             ),
           ),
@@ -1066,14 +743,12 @@ class _ReportScreenState extends State<ReportScreen> {
           const SizedBox(height: 5),
 
           FittedBox(
-            fit:
-                BoxFit.scaleDown,
+            fit: BoxFit.scaleDown,
             child: Text(
               'RM ${amount.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 15,
-                fontWeight:
-                    FontWeight.w800,
+                fontWeight: FontWeight.w800,
                 color: textColor,
               ),
             ),
@@ -1094,66 +769,36 @@ class _ReportScreenState extends State<ReportScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(
-          24,
-        ),
-        border: Border.all(
-          color:
-              const Color(
-            0xFFF1E6E3,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFF1E6E3)),
         boxShadow: [
           BoxShadow(
-            color:
-                Colors.black
-                    .withOpacity(
-              0.025,
-            ),
+            color: Colors.black.withValues(alpha: 0.025),
             blurRadius: 12,
-            offset:
-                const Offset(
-              0,
-              5,
-            ),
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Text(
                 title,
-                style:
-                    const TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                      FontWeight
-                          .w800,
-                  color:
-                      Color(
-                    0xFF403633,
-                  ),
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF403633),
                 ),
               ),
 
               const SizedBox(width: 6),
 
-              Text(
-                emoji,
-                style:
-                    const TextStyle(
-                  fontSize: 17,
-                ),
-              ),
+              Text(emoji, style: const TextStyle(fontSize: 17)),
             ],
           ),
 
@@ -1170,22 +815,13 @@ class _ReportScreenState extends State<ReportScreen> {
   // =========================================================
 
   Widget _buildCategoryCard() {
-    final breakdown =
-        _categoryBreakdown;
+    final breakdown = _categoryBreakdown;
 
     final entries = breakdown.entries
-        .where(
-          (entry) =>
-              entry.value > 0,
-        )
+        .where((entry) => entry.value > 0)
         .toList();
 
-    entries.sort(
-      (a, b) =>
-          b.value.compareTo(
-        a.value,
-      ),
-    );
+    entries.sort((a, b) => b.value.compareTo(a.value));
 
     return _sectionCard(
       title: 'Spending by Category',
@@ -1196,82 +832,53 @@ class _ReportScreenState extends State<ReportScreen> {
             width: 175,
             height: 175,
             child: Stack(
-              alignment:
-                  Alignment.center,
+              alignment: Alignment.center,
               children: [
                 CustomPaint(
-                  size:
-                      const Size(
-                    175,
-                    175,
-                  ),
-                  painter:
-                      _DonutPainter(
-                    data:
-                        breakdown,
-                    colorFor:
-                        _categoryColor,
+                  size: const Size(175, 175),
+                  painter: _DonutPainter(
+                    data: breakdown,
+                    colorFor: _categoryColor,
                   ),
                 ),
 
                 Container(
                   width: 90,
                   height: 90,
-                  alignment:
-                      Alignment.center,
-                  decoration:
-                      const BoxDecoration(
-                    color:
-                        Colors.white,
-                    shape:
-                        BoxShape.circle,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
                   ),
                   child: Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment
-                            .center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
                         'Total',
-                        style:
-                            TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color:
-                              Color(
-                            0xFF9A8D88,
-                          ),
+                          color: Color(0xFF9A8D88),
                         ),
                       ),
 
-                      const SizedBox(
-                        height: 3,
-                      ),
+                      const SizedBox(height: 3),
 
                       FittedBox(
                         child: Text(
                           'RM ${_totalExpense.toStringAsFixed(2)}',
-                          style:
-                              const TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
-                            fontWeight:
-                                FontWeight.w800,
-                            color:
-                                Color(
-                              0xFF403633,
-                            ),
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF403633),
                           ),
                         ),
                       ),
 
                       const Text(
                         '♡',
-                        style:
-                            TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color:
-                              Color(
-                            0xFFF2A6B3,
-                          ),
+                          color: Color(0xFFF2A6B3),
                         ),
                       ),
                     ],
@@ -1283,153 +890,79 @@ class _ReportScreenState extends State<ReportScreen> {
 
           const SizedBox(height: 20),
 
-          ...entries.map(
-            (entry) {
-              final percent =
-                  _totalExpense == 0
-                      ? 0.0
-                      : entry.value /
-                          _totalExpense *
-                          100;
+          ...entries.map((entry) {
+            final percent = _totalExpense == 0
+                ? 0.0
+                : entry.value / _totalExpense * 100;
 
-              return Container(
-                margin:
-                    const EdgeInsets
-                        .only(
-                  bottom: 9,
-                ),
-                padding:
-                    const EdgeInsets
-                        .symmetric(
-                  horizontal: 11,
-                  vertical: 9,
-                ),
-                decoration:
-                    BoxDecoration(
-                  color:
-                      _categoryColor(
-                    entry.key,
-                  ).withOpacity(
-                    0.12,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 9),
+              padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
+              decoration: BoxDecoration(
+                color: _categoryColor(entry.key).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: _categoryColor(entry.key).withValues(alpha: 0.24),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Text(
+                      _categoryEmoji(entry.key),
+                      style: const TextStyle(fontSize: 17),
+                    ),
                   ),
-                  borderRadius:
-                      BorderRadius
-                          .circular(
-                    14,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 34,
-                      height: 34,
-                      alignment:
-                          Alignment
-                              .center,
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            _categoryColor(
-                          entry.key,
-                        ).withOpacity(
-                          0.24,
-                        ),
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          11,
-                        ),
-                      ),
-                      child: Text(
-                        _categoryEmoji(
-                          entry.key,
-                        ),
-                        style:
-                            const TextStyle(
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
 
-                    const SizedBox(
-                      width: 10,
-                    ),
+                  const SizedBox(width: 10),
 
-                    Expanded(
-                      child: Text(
-                        entry.key,
-                        style:
-                            const TextStyle(
-                          fontSize: 12,
-                          fontWeight:
-                              FontWeight.w600,
-                          color:
-                              Color(
-                            0xFF625C5A,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    Text(
-                      'RM ${entry.value.toStringAsFixed(0)}',
-                      style:
-                          const TextStyle(
+                  Expanded(
+                    child: Text(
+                      entry.key,
+                      style: const TextStyle(
                         fontSize: 12,
-                        fontWeight:
-                            FontWeight.w700,
-                        color:
-                            Color(
-                          0xFF302C2B,
-                        ),
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF625C5A),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(
-                      width: 9,
+                  Text(
+                    'RM ${entry.value.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF302C2B),
                     ),
+                  ),
 
-                    Container(
-                      width: 47,
-                      padding:
-                          const EdgeInsets
-                              .symmetric(
-                        vertical: 4,
-                      ),
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            Colors.white
-                                .withOpacity(
-                          0.8,
-                        ),
-                        borderRadius:
-                            BorderRadius
-                                .circular(
-                          12,
-                        ),
-                      ),
-                      alignment:
-                          Alignment.center,
-                      child: Text(
-                        '${percent.toStringAsFixed(0)}%',
-                        style:
-                            const TextStyle(
-                          fontSize: 10,
-                          fontWeight:
-                              FontWeight.w700,
-                          color:
-                              Color(
-                            0xFF8D817D,
-                          ),
-                        ),
+                  const SizedBox(width: 9),
+
+                  Container(
+                    width: 47,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${percent.toStringAsFixed(0)}%',
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF8D817D),
                       ),
                     ),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -1440,13 +973,7 @@ class _ReportScreenState extends State<ReportScreen> {
   // =========================================================
 
   Widget _buildIncomeExpenseCard() {
-    final maxValue = math.max(
-      _totalIncome,
-      math.max(
-        _totalExpense,
-        1.0,
-      ),
-    );
+    final maxValue = math.max(_totalIncome, math.max(_totalExpense, 1.0));
 
     const maxBarHeight = 115.0;
 
@@ -1454,48 +981,25 @@ class _ReportScreenState extends State<ReportScreen> {
       title: 'Income vs Expense',
       emoji: '💸',
       child: Row(
-        mainAxisAlignment:
-            MainAxisAlignment
-                .spaceEvenly,
-        crossAxisAlignment:
-            CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           _incomeExpenseBar(
             emoji: '💚',
             label: 'Income',
-            amount:
-                _totalIncome,
-            barHeight:
-                maxBarHeight *
-                    (_totalIncome /
-                        maxValue),
-            barColor:
-                const Color(
-              0xFF8FD2BE,
-            ),
-            labelColor:
-                const Color(
-              0xFF347B69,
-            ),
+            amount: _totalIncome,
+            barHeight: maxBarHeight * (_totalIncome / maxValue),
+            barColor: const Color(0xFF8FD2BE),
+            labelColor: const Color(0xFF347B69),
           ),
 
           _incomeExpenseBar(
             emoji: '🌸',
             label: 'Expense',
-            amount:
-                _totalExpense,
-            barHeight:
-                maxBarHeight *
-                    (_totalExpense /
-                        maxValue),
-            barColor:
-                const Color(
-              0xFFFFB6BC,
-            ),
-            labelColor:
-                const Color(
-              0xFFA64E4E,
-            ),
+            amount: _totalExpense,
+            barHeight: maxBarHeight * (_totalExpense / maxValue),
+            barColor: const Color(0xFFFFB6BC),
+            labelColor: const Color(0xFFA64E4E),
           ),
         ],
       ),
@@ -1512,90 +1016,50 @@ class _ReportScreenState extends State<ReportScreen> {
   }) {
     return Expanded(
       child: Column(
-        mainAxisSize:
-            MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 48,
             height: 48,
-            alignment:
-                Alignment.center,
-            decoration:
-                BoxDecoration(
-              color: barColor
-                  .withOpacity(
-                0.18,
-              ),
-              shape:
-                  BoxShape.circle,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: barColor.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
             ),
-            child: Text(
-              emoji,
-              style:
-                  const TextStyle(
-                fontSize: 22,
-              ),
-            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 22)),
           ),
 
-          const SizedBox(
-            height: 12,
-          ),
+          const SizedBox(height: 12),
 
           Container(
             width: 62,
-            height:
-                barHeight < 10
-                    ? 10
-                    : barHeight,
-            decoration:
-                BoxDecoration(
+            height: barHeight < 10 ? 10 : barHeight,
+            decoration: BoxDecoration(
               color: barColor,
-              borderRadius:
-                  const BorderRadius
-                      .vertical(
-                top:
-                    Radius.circular(
-                  17,
-                ),
-                bottom:
-                    Radius.circular(
-                  5,
-                ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(17),
+                bottom: Radius.circular(5),
               ),
             ),
           ),
 
-          const SizedBox(
-            height: 10,
-          ),
+          const SizedBox(height: 10),
 
           Text(
             label,
             style: TextStyle(
               fontSize: 12,
-              fontWeight:
-                  FontWeight.w700,
-              color:
-                  labelColor,
+              fontWeight: FontWeight.w700,
+              color: labelColor,
             ),
           ),
 
-          const SizedBox(
-            height: 4,
-          ),
+          const SizedBox(height: 4),
 
           FittedBox(
             child: Text(
               'RM ${amount.toStringAsFixed(2)}',
-              style:
-                  const TextStyle(
-                fontSize: 11,
-                color:
-                    Color(
-                  0xFF8D817D,
-                ),
-              ),
+              style: const TextStyle(fontSize: 11, color: Color(0xFF8D817D)),
             ),
           ),
         ],
@@ -1609,73 +1073,40 @@ class _ReportScreenState extends State<ReportScreen> {
 
   Widget _buildSummaryCard() {
     return _sectionCard(
-      title:
-          '$selectedPeriod Summary',
+      title: '$selectedPeriod Summary',
       emoji: '✨',
       child: Column(
         children: [
           _summaryRow(
             emoji: '💚',
             label: 'Income',
-            amount:
-                _totalIncome,
-            background:
-                const Color(
-              0xFFE2F4ED,
-            ),
-            textColor:
-                const Color(
-              0xFF347B69,
-            ),
+            amount: _totalIncome,
+            background: const Color(0xFFE2F4ED),
+            textColor: const Color(0xFF347B69),
           ),
 
-          const SizedBox(
-            height: 9,
-          ),
+          const SizedBox(height: 9),
 
           _summaryRow(
             emoji: '🌸',
             label: 'Expense',
-            amount:
-                _totalExpense,
-            background:
-                const Color(
-              0xFFFFE7E9,
-            ),
-            textColor:
-                const Color(
-              0xFFA64E4E,
-            ),
+            amount: _totalExpense,
+            background: const Color(0xFFFFE7E9),
+            textColor: const Color(0xFFA64E4E),
           ),
 
-          const SizedBox(
-            height: 9,
-          ),
+          const SizedBox(height: 9),
 
           _summaryRow(
-            emoji:
-                _balance >= 0
-                    ? '🌱'
-                    : '🥺',
+            emoji: _balance >= 0 ? '🌱' : '🥺',
             label: 'Balance',
-            amount:
-                _balance,
-            background:
-                _balance >= 0
-                    ? const Color(
-                        0xFFE7F6F0,
-                      )
-                    : const Color(
-                        0xFFFFECEC,
-                      ),
-            textColor:
-                _balance >= 0
-                    ? const Color(
-                        0xFF277765,
-                      )
-                    : const Color(
-                        0xFFA64E4E,
-                      ),
+            amount: _balance,
+            background: _balance >= 0
+                ? const Color(0xFFE7F6F0)
+                : const Color(0xFFFFECEC),
+            textColor: _balance >= 0
+                ? const Color(0xFF277765)
+                : const Color(0xFFA64E4E),
           ),
         ],
       ),
@@ -1691,62 +1122,32 @@ class _ReportScreenState extends State<ReportScreen> {
   }) {
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets
-              .symmetric(
-        horizontal: 13,
-        vertical: 11,
-      ),
-      decoration:
-          BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+      decoration: BoxDecoration(
         color: background,
-        borderRadius:
-            BorderRadius.circular(
-          16,
-        ),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
           Container(
             width: 37,
             height: 37,
-            alignment:
-                Alignment.center,
-            decoration:
-                BoxDecoration(
-              color:
-                  Colors.white
-                      .withOpacity(
-                0.75,
-              ),
-              borderRadius:
-                  BorderRadius
-                      .circular(
-                12,
-              ),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              emoji,
-              style:
-                  const TextStyle(
-                fontSize: 18,
-              ),
-            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 18)),
           ),
 
-          const SizedBox(
-            width: 11,
-          ),
+          const SizedBox(width: 11),
 
           Expanded(
             child: Text(
               label,
-              style:
-                  TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                fontWeight:
-                    FontWeight
-                        .w600,
+                fontWeight: FontWeight.w600,
                 color: textColor,
               ),
             ),
@@ -1756,8 +1157,7 @@ class _ReportScreenState extends State<ReportScreen> {
             'RM ${amount.toStringAsFixed(2)}',
             style: TextStyle(
               fontSize: 13,
-              fontWeight:
-                  FontWeight.w800,
+              fontWeight: FontWeight.w800,
               color: textColor,
             ),
           ),
@@ -1773,108 +1173,52 @@ class _ReportScreenState extends State<ReportScreen> {
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
-      padding:
-          const EdgeInsets.symmetric(
-        vertical: 42,
-        horizontal: 20,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 42, horizontal: 20),
       decoration: BoxDecoration(
-        gradient:
-            const LinearGradient(
-          colors: [
-            Colors.white,
-            Color(0xFFFFF5F2),
-          ],
+        gradient: const LinearGradient(
+          colors: [Colors.white, Color(0xFFFFF5F2)],
         ),
-        borderRadius:
-            BorderRadius.circular(
-          25,
-        ),
-        border: Border.all(
-          color:
-              const Color(
-            0xFFF1E6E3,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: const Color(0xFFF1E6E3)),
       ),
       child: Column(
         children: [
           Container(
             width: 75,
             height: 75,
-            alignment:
-                Alignment.center,
-            decoration:
-                const BoxDecoration(
-              color:
-                  Color(
-                0xFFFFE9ED,
-              ),
-              shape:
-                  BoxShape.circle,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFE9ED),
+              shape: BoxShape.circle,
             ),
-            child:
-                const Text(
-              '🌱',
-              style:
-                  TextStyle(
-                fontSize: 37,
-              ),
-            ),
+            child: const Text('🌱', style: TextStyle(fontSize: 37)),
           ),
 
-          const SizedBox(
-            height: 14,
-          ),
+          const SizedBox(height: 14),
 
           const Text(
             'No report data yet',
-            style:
-                TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              fontWeight:
-                  FontWeight.w700,
-              color:
-                  Color(
-                0xFF4F4643,
-              ),
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF4F4643),
             ),
           ),
 
-          const SizedBox(
-            height: 6,
-          ),
+          const SizedBox(height: 6),
 
           Text(
             'No transactions found for $_periodLabel.',
-            textAlign:
-                TextAlign.center,
-            style:
-                const TextStyle(
-              fontSize: 12,
-              color:
-                  Color(
-                0xFF9A8D88,
-              ),
-            ),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF9A8D88)),
           ),
 
-          const SizedBox(
-            height: 5,
-          ),
+          const SizedBox(height: 5),
 
           const Text(
             'Your financial story will appear here ✨',
-            textAlign:
-                TextAlign.center,
-            style:
-                TextStyle(
-              fontSize: 11,
-              color:
-                  Color(
-                0xFFB09F9A,
-              ),
-            ),
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 11, color: Color(0xFFB09F9A)),
           ),
         ],
       ),
@@ -1885,44 +1229,28 @@ class _ReportScreenState extends State<ReportScreen> {
   // CATEGORY COLOR
   // =========================================================
 
-  Color _categoryColor(
-    String category,
-  ) {
+  Color _categoryColor(String category) {
     switch (category) {
       case 'Food':
-        return const Color(
-          0xFF8ED8A5,
-        );
+        return const Color(0xFF8ED8A5);
 
       case 'Transport':
-        return const Color(
-          0xFFFFB4BB,
-        );
+        return const Color(0xFFFFB4BB);
 
       case 'Shopping':
-        return const Color(
-          0xFFD8CCFF,
-        );
+        return const Color(0xFFD8CCFF);
 
       case 'Bills':
-        return const Color(
-          0xFFFFD887,
-        );
+        return const Color(0xFFFFD887);
 
       case 'Family':
-        return const Color(
-          0xFFFFCDBD,
-        );
+        return const Color(0xFFFFCDBD);
 
       case 'Health':
-        return const Color(
-          0xFFFFAFC1,
-        );
+        return const Color(0xFFFFAFC1);
 
       default:
-        return const Color(
-          0xFFDCD5EE,
-        );
+        return const Color(0xFFDCD5EE);
     }
   }
 
@@ -1930,9 +1258,7 @@ class _ReportScreenState extends State<ReportScreen> {
   // CATEGORY EMOJI
   // =========================================================
 
-  String _categoryEmoji(
-    String category,
-  ) {
+  String _categoryEmoji(String category) {
     switch (category) {
       case 'Food':
         return '🍔';
@@ -1965,51 +1291,28 @@ class _ReportScreenState extends State<ReportScreen> {
 class _DonutPainter extends CustomPainter {
   final Map<String, double> data;
 
-  final Color Function(
-    String category,
-  ) colorFor;
+  final Color Function(String category) colorFor;
 
-  _DonutPainter({
-    required this.data,
-    required this.colorFor,
-  });
+  _DonutPainter({required this.data, required this.colorFor});
 
   @override
-  void paint(
-    Canvas canvas,
-    Size size,
-  ) {
-    final total =
-        data.values.fold(
-      0.0,
-      (sum, value) =>
-          sum + value,
-    );
+  void paint(Canvas canvas, Size size) {
+    final total = data.values.fold(0.0, (sum, value) => sum + value);
 
-    final rect =
-        Offset.zero & size;
+    final rect = Offset.zero & size;
 
-    final strokeWidth =
-        size.width * 0.22;
+    final strokeWidth = size.width * 0.22;
 
     final paint = Paint()
-      ..style =
-          PaintingStyle.stroke
-      ..strokeWidth =
-          strokeWidth
-      ..strokeCap =
-          StrokeCap.round;
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
 
     if (total <= 0) {
-      paint.color =
-          const Color(
-        0xFFF4E5E3,
-      );
+      paint.color = const Color(0xFFF4E5E3);
 
       canvas.drawArc(
-        rect.deflate(
-          strokeWidth / 2,
-        ),
+        rect.deflate(strokeWidth / 2),
         0,
         2 * math.pi,
         false,
@@ -2019,55 +1322,35 @@ class _DonutPainter extends CustomPainter {
       return;
     }
 
-    double startAngle =
-        -math.pi / 2;
+    double startAngle = -math.pi / 2;
 
     const gap = 0.035;
 
-    for (final entry
-        in data.entries) {
+    for (final entry in data.entries) {
       if (entry.value <= 0) {
         continue;
       }
 
-      final fullSweep =
-          (entry.value / total) *
-              2 *
-              math.pi;
+      final fullSweep = (entry.value / total) * 2 * math.pi;
 
-      final sweep =
-          math.max(
-        0.0,
-        fullSweep - gap,
-      );
+      final sweep = math.max(0.0, fullSweep - gap);
 
-      paint.color =
-          colorFor(
-        entry.key,
-      );
+      paint.color = colorFor(entry.key);
 
       canvas.drawArc(
-        rect.deflate(
-          strokeWidth / 2,
-        ),
+        rect.deflate(strokeWidth / 2),
         startAngle,
         sweep,
         false,
         paint,
       );
 
-      startAngle +=
-          fullSweep;
+      startAngle += fullSweep;
     }
   }
 
   @override
-  bool shouldRepaint(
-    covariant _DonutPainter
-        oldDelegate,
-  ) {
-    return oldDelegate.data
-            .toString() !=
-        data.toString();
+  bool shouldRepaint(covariant _DonutPainter oldDelegate) {
+    return oldDelegate.data.toString() != data.toString();
   }
 }

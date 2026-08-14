@@ -8,6 +8,9 @@ class TransactionItem {
   final bool income;
   final DateTime date;
   final Uint8List? receipt;
+  final String paymentMethod;
+  final String wallet;
+  final String note;
 
   const TransactionItem({
     this.id,
@@ -17,6 +20,9 @@ class TransactionItem {
     required this.income,
     required this.date,
     this.receipt,
+    this.paymentMethod = 'Cash',
+    this.wallet = 'Cash',
+    this.note = '',
   });
 
   String get emoji {
@@ -44,6 +50,9 @@ class TransactionItem {
       'income': income ? 1 : 0,
       'date': date.toIso8601String(),
       'receipt': receipt,
+      'payment_method': paymentMethod,
+      'wallet': wallet,
+      'note': note,
     };
   }
 
@@ -56,6 +65,9 @@ class TransactionItem {
       income: (map['income'] as int) == 1,
       date: DateTime.parse(map['date'] as String),
       receipt: map['receipt'] as Uint8List?,
+      paymentMethod: (map['payment_method'] as String?) ?? 'Cash',
+      wallet: (map['wallet'] as String?) ?? 'Cash',
+      note: (map['note'] as String?) ?? '',
     );
   }
 
@@ -67,6 +79,9 @@ class TransactionItem {
     bool? income,
     DateTime? date,
     Uint8List? receipt,
+    String? paymentMethod,
+    String? wallet,
+    String? note,
   }) {
     return TransactionItem(
       id: id ?? this.id,
@@ -76,6 +91,9 @@ class TransactionItem {
       income: income ?? this.income,
       date: date ?? this.date,
       receipt: receipt ?? this.receipt,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      wallet: wallet ?? this.wallet,
+      note: note ?? this.note,
     );
   }
 }
