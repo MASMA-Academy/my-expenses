@@ -207,7 +207,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void showMessage(String message) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ).showSnackBar(SnackBar(content: Text(message), showCloseIcon: true));
   }
 
   InputDecoration inputDecoration({String? hint, Widget? prefixIcon}) {

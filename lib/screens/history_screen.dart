@@ -48,7 +48,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<void> _exportToCsv() async {
     if (kIsWeb) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Export isn't available on web yet.")),
+        const SnackBar(
+          content: Text("Export isn't available on web yet."),
+          showCloseIcon: true,
+        ),
       );
 
       return;
@@ -58,9 +61,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Exported to $path')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Exported to $path'), showCloseIcon: true),
+    );
   }
 
   // =========================================================

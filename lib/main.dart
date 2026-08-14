@@ -148,9 +148,12 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex = 0;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Transaction saved ✅')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transaction saved ✅'),
+          showCloseIcon: true,
+        ),
+      );
 
       await _checkBudgetAndNotify(inserted);
     } else {
@@ -166,9 +169,12 @@ class _MainScreenState extends State<MainScreen> {
         }
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Transaction updated ✅')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transaction updated ✅'),
+          showCloseIcon: true,
+        ),
+      );
 
       await _checkBudgetAndNotify(result);
     }
@@ -222,6 +228,7 @@ class _MainScreenState extends State<MainScreen> {
           label: 'Undo',
           onPressed: () => _undoDelete(item),
         ),
+        showCloseIcon: true,
       ),
     );
   }
@@ -356,7 +363,10 @@ class _MainScreenState extends State<MainScreen> {
               Navigator.pop(sheetContext);
 
               ScaffoldMessenger.of(this.context).showSnackBar(
-                const SnackBar(content: Text('App lock updated 🔒')),
+                const SnackBar(
+                  content: Text('App lock updated 🔒'),
+                  showCloseIcon: true,
+                ),
               );
             }
 
@@ -383,7 +393,10 @@ class _MainScreenState extends State<MainScreen> {
               Navigator.pop(sheetContext);
 
               ScaffoldMessenger.of(this.context).showSnackBar(
-                const SnackBar(content: Text('App lock disabled')),
+                const SnackBar(
+                  content: Text('App lock disabled'),
+                  showCloseIcon: true,
+                ),
               );
             }
 
