@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../models/transaction_item.dart';
@@ -48,17 +47,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
 
   Future<void> _exportToCsv() async {
-    if (kIsWeb) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Export isn't available on web yet."),
-          showCloseIcon: true,
-        ),
-      );
-
-      return;
-    }
-
     final path = await exportTransactionsToCsv(widget.transactions);
 
     if (!mounted) return;

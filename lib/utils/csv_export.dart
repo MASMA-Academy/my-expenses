@@ -1,17 +1,21 @@
-import 'package:path_provider/path_provider.dart';
-import 'package:universal_io/io.dart';
+import 'dart:convert';
+
+import 'package:file_saver/file_saver.dart';
 
 import '../models/transaction_item.dart';
 
-/// Writes all transactions to a CSV file in app-accessible device storage
-/// and returns the saved file's path. Not supported on web (no real
-/// filesystem) — callers should guard with `kIsWeb` before calling this.
+/// Saves all transactions as a CSV file into the device's Downloads folder
+/// (on Android/iOS this goes through the OS save-file flow; on web it
+/// triggers a browser download) and returns wherever the platform reports
+/// it was saved.
 Future<String> exportTransactionsToCsv(
   List<TransactionItem> transactions,
 ) async {
   final buffer = StringBuffer();
 
-  buffer.writeln('Date,Title,Category,Type,Amount,Payment Method,Wallet,Note');
+  buffer.writeln(
+    'Date,Title,Category,Type,Amount,Payment Method,Wallet,Note',
+  );
 
   for (final transaction in transactions) {
     buffer.writeln(
@@ -28,19 +32,14 @@ Future<String> exportTransactionsToCsv(
     );
   }
 
-  final directory = Platform.isAndroid
-      ? (await getExternalStorageDirectory() ??
-            await getApplicationDocumentsDirectory())
-      : await getApplicationDocumentsDirectory();
+  final fileName = 'myxpenses_export_${DateTime.now().millisecondsSinceEpoch}';
 
-  final fileName =
-      'myxpenses_export_${DateTime.now().millisecondsSinceEpoch}.csv';
-
-  final file = File('${directory.path}/$fileName');
-
-  await file.writeAsString(buffer.toString());
-
-  return file.path;
+  return FileSaver.instance.saveFile(
+    name: fileName,
+    bytes: utf8.encode(buffer.toString()),
+    fileExtension: 'csv',
+    mimeType: MimeType.csv,
+  );
 }
 
 String _csvField(String value) {
