@@ -13,13 +13,18 @@ import 'screens/report_screen.dart';
 import 'screens/budget_screen.dart';
 import 'screens/pin_lock_screen.dart';
 import 'utils/app_lock.dart';
+import 'utils/budget_notifications.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // sqflite only talks to a real filesystem on Android/iOS/macOS.
   // On web it needs the IndexedDB-backed ffi factory instead.
   if (kIsWeb) {
     databaseFactory = databaseFactoryFfiWeb;
   }
+
+  await BudgetNotifications.init();
 
   runApp(const MyXpensesApp());
 }
@@ -146,6 +151,8 @@ class _MainScreenState extends State<MainScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Transaction saved ✅')));
+
+      await _checkBudgetAndNotify(inserted);
     } else {
       await AppDatabase.instance.updateTransaction(result);
 
@@ -162,6 +169,37 @@ class _MainScreenState extends State<MainScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Transaction updated ✅')));
+
+      await _checkBudgetAndNotify(result);
+    }
+  }
+
+  Future<void> _checkBudgetAndNotify(TransactionItem saved) async {
+    if (saved.income) return;
+
+    final limits = await AppDatabase.instance.getBudgetLimits();
+    final limit = limits[saved.category];
+
+    if (limit == null) return;
+
+    final now = DateTime.now();
+
+    final spent = transactions
+        .where(
+          (t) =>
+              !t.income &&
+              t.category == saved.category &&
+              t.date.year == now.year &&
+              t.date.month == now.month,
+        )
+        .fold(0.0, (sum, t) => sum + t.amount);
+
+    if (spent > limit) {
+      await BudgetNotifications.showBudgetExceeded(
+        category: saved.category,
+        spent: spent,
+        limit: limit,
+      );
     }
   }
 
