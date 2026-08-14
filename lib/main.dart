@@ -67,6 +67,7 @@ class _MainScreenState extends State<MainScreen> {
   // ==============================
 
   List<TransactionItem> transactions = [];
+  List<String> customCategoryNames = [];
   bool _loading = true;
 
   @override
@@ -78,9 +79,15 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _loadTransactions() async {
     final loaded = await AppDatabase.instance.getTransactions();
+    final customCategories = await AppDatabase.instance.getCustomCategories();
+
+    if (!mounted) return;
 
     setState(() {
       transactions = loaded;
+      customCategoryNames = customCategories
+          .map((row) => row['title'] as String)
+          .toList();
       _loading = false;
     });
   }
@@ -101,7 +108,10 @@ class _MainScreenState extends State<MainScreen> {
     final result = await Navigator.push<TransactionItem>(
       context,
       MaterialPageRoute(
-        builder: (context) => AddTransactionScreen(existing: existing),
+        builder: (context) => AddTransactionScreen(
+          existing: existing,
+          extraCategories: customCategoryNames,
+        ),
       ),
     );
 

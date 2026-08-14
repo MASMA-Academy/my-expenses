@@ -7,8 +7,13 @@ import '../models/transaction_item.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionItem? existing;
+  final List<String> extraCategories;
 
-  const AddTransactionScreen({super.key, this.existing});
+  const AddTransactionScreen({
+    super.key,
+    this.existing,
+    this.extraCategories = const [],
+  });
 
   @override
   State<AddTransactionScreen> createState() =>
@@ -61,7 +66,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   ];
 
   List<String> get currentCategories {
-    return isIncome ? incomeCategories : expenseCategories;
+    if (isIncome) return incomeCategories;
+
+    return [...expenseCategories, ...widget.extraCategories];
   }
 
   @override

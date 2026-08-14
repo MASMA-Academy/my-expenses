@@ -75,7 +75,50 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
     _displayMonth = DateTime.now();
 
+    _loadCustomCategories();
     _loadBudgetLimits();
+  }
+
+  // =========================================================
+  // LOAD CUSTOM CATEGORIES
+  // =========================================================
+
+  Future<void> _loadCustomCategories() async {
+    final rows = await AppDatabase.instance.getCustomCategories();
+
+    if (rows.isEmpty) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      for (final row in rows) {
+        final title = row['title'] as String;
+
+        final alreadyExists = _categories.any(
+          (category) => category.title == title,
+        );
+
+        if (alreadyExists) {
+          continue;
+        }
+
+        _categories.add(
+          BudgetCategory(
+            title: title,
+            emoji: row['emoji'] as String,
+            limit: 300,
+            color: Color(row['color'] as int),
+          ),
+        );
+      }
+    });
+
+    // Overlay saved limits onto the newly-added categories too.
+    await _loadBudgetLimits();
   }
 
   // =========================================================
@@ -107,7 +150,301 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
   Future<void> _handleReload() async {
     await widget.onReload();
+    await _loadCustomCategories();
     await _loadBudgetLimits();
+  }
+
+  // =========================================================
+  // ADD CUSTOM CATEGORY
+  // =========================================================
+
+  static const List<String> _emojiChoices = [
+    '✨', '🎮', '📚', '🐾', '🎁', '🚕', '🍿', '💻',
+  ];
+
+  static const List<Color> _colorChoices = [
+    Color(0xFF8ED8A5),
+    Color(0xFF8ED8D8),
+    Color(0xFFF4B9C3),
+    Color(0xFFFFD27A),
+    Color(0xFFFFB9A7),
+    Color(0xFFB9A7FF),
+    Color(0xFFA7D2FF),
+    Color(0xFFD6C6FF),
+  ];
+
+  void _showAddCategorySheet() {
+    final nameController = TextEditingController();
+    String selectedEmoji = _emojiChoices.first;
+    Color selectedColor = _colorChoices.first;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(22, 16, 22, 28),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF8F6),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(32),
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 44,
+                            height: 5,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE4D4D1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        const Center(
+                          child: Text(
+                            'New Category',
+                            style: TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF403633),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        const Text(
+                          'Name',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF4F4643),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            hintText: 'e.g. Pets',
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Icon',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF4F4643),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _emojiChoices.map((emoji) {
+                            final selected = emoji == selectedEmoji;
+
+                            return GestureDetector(
+                              onTap: () {
+                                setModalState(() {
+                                  selectedEmoji = emoji;
+                                });
+                              },
+                              child: Container(
+                                width: 42,
+                                height: 42,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: selected
+                                      ? const Color(0xFFFFE0E0)
+                                      : Colors.white,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selected
+                                        ? const Color(0xFFE47B7B)
+                                        : const Color(0xFFF1E6E3),
+                                    width: selected ? 2 : 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  emoji,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          'Color',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF4F4643),
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _colorChoices.map((color) {
+                            final selected = color == selectedColor;
+
+                            return GestureDetector(
+                              onTap: () {
+                                setModalState(() {
+                                  selectedColor = color;
+                                });
+                              },
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selected
+                                        ? const Color(0xFF403633)
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+
+                        const SizedBox(height: 26),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final title = nameController.text.trim();
+
+                              if (title.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Please enter a category name.',
+                                    ),
+                                  ),
+                                );
+
+                                return;
+                              }
+
+                              final alreadyExists = _categories.any(
+                                (category) =>
+                                    category.title.toLowerCase() ==
+                                    title.toLowerCase(),
+                              );
+
+                              if (alreadyExists) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'That category already exists.',
+                                    ),
+                                  ),
+                                );
+
+                                return;
+                              }
+
+                              await AppDatabase.instance.addCustomCategory(
+                                title: title,
+                                emoji: selectedEmoji,
+                                color: selectedColor.toARGB32(),
+                              );
+
+                              if (!mounted) return;
+
+                              setState(() {
+                                _categories.add(
+                                  BudgetCategory(
+                                    title: title,
+                                    emoji: selectedEmoji,
+                                    limit: 300,
+                                    color: selectedColor,
+                                  ),
+                                );
+                              });
+
+                              Navigator.pop(sheetContext);
+
+                              ScaffoldMessenger.of(this.context).showSnackBar(
+                                SnackBar(
+                                  behavior: SnackBarBehavior.floating,
+                                  content: Text('$title category added ✨'),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF277765),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
+                            child: const Text(
+                              'Add Category ✨',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   // =========================================================
@@ -714,9 +1051,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
 
               const SizedBox(height: 28),
 
-              const Row(
+              Row(
                 children: [
-                  Text(
+                  const Text(
                     'Budget by Category',
                     style: TextStyle(
                       fontSize: 18,
@@ -728,12 +1065,22 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     ),
                   ),
 
-                  SizedBox(width: 6),
+                  const SizedBox(width: 6),
 
-                  Text(
+                  const Text(
                     '🌷',
                     style: TextStyle(
                       fontSize: 18,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  IconButton(
+                    onPressed: _showAddCategorySheet,
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      color: Color(0xFF277765),
                     ),
                   ),
                 ],
