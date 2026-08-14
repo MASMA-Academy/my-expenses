@@ -14,12 +14,15 @@ class HistoryScreen extends StatefulWidget {
     TransactionItem transaction,
   ) onDeleteTransaction;
 
+  final Future<void> Function() onReload;
+
   const HistoryScreen({
     super.key,
     required this.transactions,
     required this.onAddTransaction,
     required this.onEditTransaction,
     required this.onDeleteTransaction,
+    required this.onReload,
   });
 
   @override
@@ -378,6 +381,14 @@ class _HistoryScreenState
         ),
 
         const Spacer(),
+
+        IconButton(
+          onPressed: widget.onReload,
+          icon: const Icon(
+            Icons.refresh_rounded,
+            color: Color(0xFF74B9A8),
+          ),
+        ),
 
         Container(
           width: 43,
@@ -1306,6 +1317,21 @@ class _HistoryScreenState
                                 FontWeight.w600,
                           ),
                         ),
+
+                        if (transaction.receipt !=
+                            null) ...[
+                          const SizedBox(
+                            width: 6,
+                          ),
+                          const Icon(
+                            Icons
+                                .attach_file_rounded,
+                            size: 11,
+                            color: Color(
+                              0xFF9A8D88,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

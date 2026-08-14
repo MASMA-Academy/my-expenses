@@ -8,10 +8,12 @@ import '../models/transaction_item.dart';
 
 class ReportScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
+  final Future<void> Function() onReload;
 
   const ReportScreen({
     super.key,
     required this.transactions,
+    required this.onReload,
   });
 
   @override
@@ -478,6 +480,14 @@ class _ReportScreenState extends State<ReportScreen> {
         ),
 
         const Spacer(),
+
+        IconButton(
+          onPressed: widget.onReload,
+          icon: const Icon(
+            Icons.refresh_rounded,
+            color: Color(0xFF347B69),
+          ),
+        ),
 
         Container(
           width: 43,

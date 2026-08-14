@@ -166,11 +166,14 @@ class _MainScreenState extends State<MainScreen> {
           onOpenHistory: () {
             changePage(3);
           },
+          onEditTransaction: openEditTransaction,
+          onReload: _loadTransactions,
         );
 
       case 1:
         return ReportScreen(
           transactions: transactions,
+          onReload: _loadTransactions,
         );
 
       case 3:
@@ -179,12 +182,14 @@ class _MainScreenState extends State<MainScreen> {
           onAddTransaction: openAddTransaction,
           onEditTransaction: openEditTransaction,
           onDeleteTransaction: deleteTransaction,
+          onReload: _loadTransactions,
         );
 
       case 4:
         return BudgetScreen(
           transactions: transactions,
           onAddTransaction: openAddTransaction,
+          onReload: _loadTransactions,
         );
 
       default:
@@ -194,6 +199,8 @@ class _MainScreenState extends State<MainScreen> {
           onOpenHistory: () {
             changePage(3);
           },
+          onEditTransaction: openEditTransaction,
+          onReload: _loadTransactions,
         );
     }
   }
@@ -318,8 +325,8 @@ class _MainScreenState extends State<MainScreen> {
               // ========================
 
               _navItem(
-                icon: Icons.savings_outlined,
-                activeIcon: Icons.savings_rounded,
+                icon: Icons.account_balance_wallet_outlined,
+                activeIcon: Icons.account_balance_wallet_rounded,
                 label: 'Budget',
                 index: 4,
               ),

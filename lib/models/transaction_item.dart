@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class TransactionItem {
   final int? id;
   final String title;
@@ -5,6 +7,7 @@ class TransactionItem {
   final double amount;
   final bool income;
   final DateTime date;
+  final Uint8List? receipt;
 
   const TransactionItem({
     this.id,
@@ -13,6 +16,7 @@ class TransactionItem {
     required this.amount,
     required this.income,
     required this.date,
+    this.receipt,
   });
 
   String get emoji {
@@ -39,6 +43,7 @@ class TransactionItem {
       'amount': amount,
       'income': income ? 1 : 0,
       'date': date.toIso8601String(),
+      'receipt': receipt,
     };
   }
 
@@ -50,6 +55,7 @@ class TransactionItem {
       amount: map['amount'] as double,
       income: (map['income'] as int) == 1,
       date: DateTime.parse(map['date'] as String),
+      receipt: map['receipt'] as Uint8List?,
     );
   }
 
@@ -60,6 +66,7 @@ class TransactionItem {
     double? amount,
     bool? income,
     DateTime? date,
+    Uint8List? receipt,
   }) {
     return TransactionItem(
       id: id ?? this.id,
@@ -68,6 +75,7 @@ class TransactionItem {
       amount: amount ?? this.amount,
       income: income ?? this.income,
       date: date ?? this.date,
+      receipt: receipt ?? this.receipt,
     );
   }
 }

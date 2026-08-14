@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/transaction_item.dart';
 
@@ -24,6 +27,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   String selectedWallet = 'Cash';
 
   DateTime selectedDate = DateTime.now();
+  Uint8List? receiptBytes;
 
   final List<String> expenseCategories = [
     'Food',
@@ -72,6 +76,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       isIncome = existing.income;
       selectedCategory = existing.category;
       selectedDate = existing.date;
+      receiptBytes = existing.receipt;
     }
   }
 
@@ -110,6 +115,64 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
   }
 
+  Future<void> pickReceipt() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_camera_outlined),
+                  title: const Text('Take Photo'),
+                  onTap: () {
+                    Navigator.pop(sheetContext, ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: const Text('Choose from Gallery'),
+                  onTap: () {
+                    Navigator.pop(sheetContext, ImageSource.gallery);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (source == null) return;
+
+    final picked = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 80,
+    );
+
+    if (picked == null) return;
+
+    final bytes = await picked.readAsBytes();
+
+    setState(() {
+      receiptBytes = bytes;
+    });
+  }
+
+  void removeReceipt() {
+    setState(() {
+      receiptBytes = null;
+    });
+  }
+
   void saveTransaction() {
     final title = titleController.text.trim();
 
@@ -134,6 +197,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       amount: amount,
       income: isIncome,
       date: selectedDate,
+      receipt: receiptBytes,
 
       // Kalau model TransactionItem kau belum ada field ni,
       // jangan masukkan dulu.
@@ -539,6 +603,72 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   hint: 'Add a note...',
                 ),
               ),
+
+              const SizedBox(height: 22),
+
+              label('Receipt (optional)'),
+
+              if (receiptBytes == null)
+                InkWell(
+                  onTap: pickReceipt,
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFFE1D8D5),
+                      ),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(
+                          Icons.receipt_long_outlined,
+                          color: Color(0xFF277765),
+                        ),
+                        SizedBox(height: 8),
+                        Text('Add Receipt Photo'),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.memory(
+                        receiptBytes!,
+                        width: double.infinity,
+                        height: 180,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: removeReceipt,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
               const SizedBox(height: 35),
 
