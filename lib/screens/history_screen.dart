@@ -6,13 +6,9 @@ class HistoryScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
   final VoidCallback onAddTransaction;
 
-  final void Function(
-    TransactionItem transaction,
-  ) onEditTransaction;
+  final void Function(TransactionItem transaction) onEditTransaction;
 
-  final void Function(
-    TransactionItem transaction,
-  ) onDeleteTransaction;
+  final void Function(TransactionItem transaction) onDeleteTransaction;
 
   final Future<void> Function() onReload;
 
@@ -26,12 +22,10 @@ class HistoryScreen extends StatefulWidget {
   });
 
   @override
-  State<HistoryScreen> createState() =>
-      _HistoryScreenState();
+  State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
-class _HistoryScreenState
-    extends State<HistoryScreen> {
+class _HistoryScreenState extends State<HistoryScreen> {
   // =========================================================
   // SEARCH
   // =========================================================
@@ -55,10 +49,7 @@ class _HistoryScreenState
   // SELECTED MONTH
   // =========================================================
 
-  DateTime selectedMonth = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-  );
+  DateTime selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
   // =========================================================
   // MONTHS
@@ -93,14 +84,10 @@ class _HistoryScreenState
   // =========================================================
 
   List<TransactionItem> get monthTransactions {
-    return widget.transactions.where(
-      (transaction) {
-        return transaction.date.year ==
-                selectedMonth.year &&
-            transaction.date.month ==
-                selectedMonth.month;
-      },
-    ).toList();
+    return widget.transactions.where((transaction) {
+      return transaction.date.year == selectedMonth.year &&
+          transaction.date.month == selectedMonth.month;
+    }).toList();
   }
 
   // =========================================================
@@ -108,25 +95,14 @@ class _HistoryScreenState
   // =========================================================
 
   List<TransactionItem> get filteredTransactions {
-    List<TransactionItem> result =
-        List<TransactionItem>.from(
+    List<TransactionItem> result = List<TransactionItem>.from(
       monthTransactions,
     );
 
     if (selectedFilter == 'Income') {
-      result = result
-          .where(
-            (transaction) =>
-                transaction.income,
-          )
-          .toList();
+      result = result.where((transaction) => transaction.income).toList();
     } else if (selectedFilter == 'Expense') {
-      result = result
-          .where(
-            (transaction) =>
-                !transaction.income,
-          )
-          .toList();
+      result = result.where((transaction) => !transaction.income).toList();
     }
 
     if (searchQuery.trim().isNotEmpty) {
@@ -140,10 +116,7 @@ class _HistoryScreenState
     }
 
     // latest first
-    result.sort(
-      (a, b) =>
-          b.date.compareTo(a.date),
-    );
+    result.sort((a, b) => b.date.compareTo(a.date));
 
     return result;
   }
@@ -154,15 +127,8 @@ class _HistoryScreenState
 
   double get totalIncome {
     return monthTransactions
-        .where(
-          (transaction) =>
-              transaction.income,
-        )
-        .fold(
-          0.0,
-          (total, transaction) =>
-              total + transaction.amount,
-        );
+        .where((transaction) => transaction.income)
+        .fold(0.0, (total, transaction) => total + transaction.amount);
   }
 
   // =========================================================
@@ -171,15 +137,8 @@ class _HistoryScreenState
 
   double get totalExpense {
     return monthTransactions
-        .where(
-          (transaction) =>
-              !transaction.income,
-        )
-        .fold(
-          0.0,
-          (total, transaction) =>
-              total + transaction.amount,
-        );
+        .where((transaction) => !transaction.income)
+        .fold(0.0, (total, transaction) => total + transaction.amount);
   }
 
   // =========================================================
@@ -196,19 +155,13 @@ class _HistoryScreenState
 
   void previousMonth() {
     setState(() {
-      selectedMonth = DateTime(
-        selectedMonth.year,
-        selectedMonth.month - 1,
-      );
+      selectedMonth = DateTime(selectedMonth.year, selectedMonth.month - 1);
     });
   }
 
   void nextMonth() {
     setState(() {
-      selectedMonth = DateTime(
-        selectedMonth.year,
-        selectedMonth.month + 1,
-      );
+      selectedMonth = DateTime(selectedMonth.year, selectedMonth.month + 1);
     });
   }
 
@@ -218,25 +171,16 @@ class _HistoryScreenState
 
   @override
   Widget build(BuildContext context) {
-    final transactions =
-        filteredTransactions;
+    final transactions = filteredTransactions;
 
     return Scaffold(
-      backgroundColor:
-          const Color(0xFFFFF8F6),
+      backgroundColor: const Color(0xFFFFF8F6),
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding:
-              const EdgeInsets.fromLTRB(
-            18,
-            8,
-            18,
-            30,
-          ),
+          padding: const EdgeInsets.fromLTRB(18, 8, 18, 30),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // =============================
               // HEADER
@@ -249,10 +193,7 @@ class _HistoryScreenState
               const Text(
                 'Your spending story, one '
                 'transaction at a time ✨',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF9A8D88),
-                ),
+                style: TextStyle(fontSize: 12, color: Color(0xFF9A8D88)),
               ),
 
               const SizedBox(height: 24),
@@ -260,7 +201,6 @@ class _HistoryScreenState
               // =============================
               // SEARCH
               // =============================
-
               _buildSearchField(),
 
               const SizedBox(height: 14),
@@ -268,7 +208,6 @@ class _HistoryScreenState
               // =============================
               // FILTER
               // =============================
-
               _buildFilter(),
 
               const SizedBox(height: 18),
@@ -276,7 +215,6 @@ class _HistoryScreenState
               // =============================
               // MONTH
               // =============================
-
               _buildMonthSelector(),
 
               const SizedBox(height: 20),
@@ -284,7 +222,6 @@ class _HistoryScreenState
               // =============================
               // SUMMARY
               // =============================
-
               _buildSummary(),
 
               const SizedBox(height: 28),
@@ -292,63 +229,39 @@ class _HistoryScreenState
               // =============================
               // TRANSACTION HEADER
               // =============================
-
               Row(
                 children: [
                   const Text(
                     'Transactions',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight:
-                          FontWeight.w800,
-                      color: Color(
-                        0xFF403633,
-                      ),
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF403633),
                     ),
                   ),
 
                   const SizedBox(width: 6),
 
-                  const Text(
-                    '🧾',
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
+                  const Text('🧾', style: TextStyle(fontSize: 18)),
 
                   const Spacer(),
 
                   Container(
-                    padding:
-                        const EdgeInsets
-                            .symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 5,
                     ),
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          const Color(
-                        0xFFFFE9ED,
-                      ),
-                      borderRadius:
-                          BorderRadius
-                              .circular(
-                        20,
-                      ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE9ED),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       '${transactions.length} '
                       '${transactions.length == 1 ? 'item' : 'items'}',
-                      style:
-                          const TextStyle(
+                      style: const TextStyle(
                         fontSize: 10.5,
-                        color: Color(
-                          0xFFA56570,
-                        ),
-                        fontWeight:
-                            FontWeight
-                                .w700,
+                        color: Color(0xFFA56570),
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -361,10 +274,8 @@ class _HistoryScreenState
                 selectedMonthLabel,
                 style: const TextStyle(
                   fontSize: 12,
-                  color:
-                      Color(0xFF9A8D88),
-                  fontWeight:
-                      FontWeight.w500,
+                  color: Color(0xFF9A8D88),
+                  fontWeight: FontWeight.w500,
                 ),
               ),
 
@@ -373,15 +284,11 @@ class _HistoryScreenState
               // =============================
               // TRANSACTION LIST
               // =============================
-
               if (transactions.isEmpty)
                 _buildEmptyState()
               else
                 ...transactions.map(
-                  (transaction) =>
-                      _buildTransactionCard(
-                    transaction,
-                  ),
+                  (transaction) => _buildTransactionCard(transaction),
                 ),
 
               const SizedBox(height: 12),
@@ -403,11 +310,8 @@ class _HistoryScreenState
           'MyXpenses',
           style: TextStyle(
             fontSize: 24,
-            fontWeight:
-                FontWeight.w800,
-            color: Color(
-              0xFF51423E,
-            ),
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF51423E),
           ),
         ),
 
@@ -415,10 +319,7 @@ class _HistoryScreenState
 
         IconButton(
           onPressed: widget.onReload,
-          icon: const Icon(
-            Icons.refresh_rounded,
-            color: Color(0xFF74B9A8),
-          ),
+          icon: const Icon(Icons.refresh_rounded, color: Color(0xFF74B9A8)),
         ),
 
         Container(
@@ -426,24 +327,11 @@ class _HistoryScreenState
           height: 43,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color:
-                const Color(
-              0xFFFFE8ED,
-            ),
+            color: const Color(0xFFFFE8ED),
             shape: BoxShape.circle,
-            border: Border.all(
-              color:
-                  const Color(
-                0xFFF6D7DC,
-              ),
-            ),
+            border: Border.all(color: const Color(0xFFF6D7DC)),
           ),
-          child: const Text(
-            '🧾',
-            style: TextStyle(
-              fontSize: 21,
-            ),
-          ),
+          child: const Text('🧾', style: TextStyle(fontSize: 21)),
         ),
       ],
     );
@@ -475,10 +363,7 @@ class _HistoryScreenState
         },
         decoration: InputDecoration(
           hintText: 'Search transactions...',
-          hintStyle: const TextStyle(
-            color: Color(0xFF9A8D88),
-            fontSize: 13,
-          ),
+          hintStyle: const TextStyle(color: Color(0xFF9A8D88), fontSize: 13),
           prefixIcon: const Icon(
             Icons.search_rounded,
             color: Color(0xFF9A8D88),
@@ -517,39 +402,23 @@ class _HistoryScreenState
 
   Widget _buildFilter() {
     return Container(
-      padding:
-          const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color:
-            const Color(0xFFEDE4E2),
-        borderRadius:
-            BorderRadius.circular(30),
+        color: const Color(0xFFEDE4E2),
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
         children: [
-          _filterButton(
-            title: 'All',
-            emoji: '✨',
-          ),
-          _filterButton(
-            title: 'Income',
-            emoji: '💚',
-          ),
-          _filterButton(
-            title: 'Expense',
-            emoji: '🌸',
-          ),
+          _filterButton(title: 'All', emoji: '✨'),
+          _filterButton(title: 'Income', emoji: '💚'),
+          _filterButton(title: 'Expense', emoji: '🌸'),
         ],
       ),
     );
   }
 
-  Widget _filterButton({
-    required String title,
-    required String emoji,
-  }) {
-    final bool selected =
-        selectedFilter == title;
+  Widget _filterButton({required String title, required String emoji}) {
+    final bool selected = selectedFilter == title;
 
     return Expanded(
       child: GestureDetector(
@@ -559,52 +428,25 @@ class _HistoryScreenState
           });
         },
         child: AnimatedContainer(
-          duration:
-              const Duration(
-            milliseconds: 200,
-          ),
-          padding:
-              const EdgeInsets.symmetric(
-            vertical: 12,
-          ),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: selected
-                ? const Color(
-                    0xFFFFD9DE,
-                  )
-                : Colors.transparent,
-            borderRadius:
-                BorderRadius.circular(
-              25,
-            ),
+            color: selected ? const Color(0xFFFFD9DE) : Colors.transparent,
+            borderRadius: BorderRadius.circular(25),
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: const Color(
-                        0xFFE9AAB3,
-                      ).withOpacity(
-                        0.15,
-                      ),
+                      color: const Color(0xFFE9AAB3).withValues(alpha: 0.15),
                       blurRadius: 8,
-                      offset:
-                          const Offset(
-                        0,
-                        3,
-                      ),
+                      offset: const Offset(0, 3),
                     ),
                   ]
                 : null,
           ),
           child: Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                emoji,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
+              Text(emoji, style: const TextStyle(fontSize: 14)),
 
               const SizedBox(width: 5),
 
@@ -612,15 +454,10 @@ class _HistoryScreenState
                 title,
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight:
-                      FontWeight.w700,
+                  fontWeight: FontWeight.w700,
                   color: selected
-                      ? const Color(
-                          0xFF925760,
-                        )
-                      : const Color(
-                          0xFF746966,
-                        ),
+                      ? const Color(0xFF925760)
+                      : const Color(0xFF746966),
                 ),
               ),
             ],
@@ -637,77 +474,41 @@ class _HistoryScreenState
   Widget _buildMonthSelector() {
     return Row(
       children: [
-        _monthButton(
-          icon:
-              Icons.chevron_left_rounded,
-          onTap: previousMonth,
-        ),
+        _monthButton(icon: Icons.chevron_left_rounded, onTap: previousMonth),
 
         const SizedBox(width: 9),
 
         Expanded(
           child: Container(
             height: 48,
-            padding:
-                const EdgeInsets
-                    .symmetric(
-              horizontal: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius:
-                  BorderRadius.circular(
-                25,
-              ),
-              border: Border.all(
-                color:
-                    const Color(
-                  0xFFF0DFDC,
-                ),
-              ),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: const Color(0xFFF0DFDC)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black
-                      .withOpacity(
-                    0.03,
-                  ),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 12,
-                  offset:
-                      const Offset(
-                    0,
-                    5,
-                  ),
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
             child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  '🗓️',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
+                const Text('🗓️', style: TextStyle(fontSize: 18)),
 
                 const SizedBox(width: 8),
 
                 Flexible(
                   child: Text(
                     selectedMonthLabel,
-                    overflow:
-                        TextOverflow
-                            .ellipsis,
-                    style:
-                        const TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                          FontWeight.w700,
-                      color:
-                          Color(
-                        0xFF544B48,
-                      ),
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF544B48),
                     ),
                   ),
                 ),
@@ -718,47 +519,24 @@ class _HistoryScreenState
 
         const SizedBox(width: 9),
 
-        _monthButton(
-          icon:
-              Icons.chevron_right_rounded,
-          onTap: nextMonth,
-        ),
+        _monthButton(icon: Icons.chevron_right_rounded, onTap: nextMonth),
       ],
     );
   }
 
-  Widget _monthButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _monthButton({required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
-      borderRadius:
-          BorderRadius.circular(30),
+      borderRadius: BorderRadius.circular(30),
       child: Container(
         width: 43,
         height: 43,
         decoration: BoxDecoration(
-          color:
-              const Color(
-            0xFFFFE8E8,
-          ),
+          color: const Color(0xFFFFE8E8),
           shape: BoxShape.circle,
-          border: Border.all(
-            color:
-                const Color(
-              0xFFF5D2D2,
-            ),
-          ),
+          border: Border.all(color: const Color(0xFFF5D2D2)),
         ),
-        child: Icon(
-          icon,
-          color:
-              const Color(
-            0xFFB56C6C,
-          ),
-          size: 25,
-        ),
+        child: Icon(icon, color: const Color(0xFFB56C6C), size: 25),
       ),
     );
   }
@@ -773,74 +551,36 @@ class _HistoryScreenState
         // Balance
         Container(
           width: double.infinity,
-          padding:
-              const EdgeInsets
-                  .symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            gradient:
-                const LinearGradient(
-              colors: [
-                Color(0xFFDDF3EB),
-                Color(0xFFF0FBF7),
-              ],
+            gradient: const LinearGradient(
+              colors: [Color(0xFFDDF3EB), Color(0xFFF0FBF7)],
             ),
-            borderRadius:
-                BorderRadius.circular(
-              22,
-            ),
-            border: Border.all(
-              color:
-                  const Color(
-                0xFFCDEAE0,
-              ),
-            ),
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(color: const Color(0xFFCDEAE0)),
           ),
           child: Row(
             children: [
               Container(
                 width: 43,
                 height: 43,
-                alignment:
-                    Alignment.center,
-                decoration:
-                    BoxDecoration(
-                  color:
-                      Colors.white
-                          .withOpacity(
-                    0.85,
-                  ),
-                  borderRadius:
-                      BorderRadius
-                          .circular(
-                    14,
-                  ),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Text(
-                  '💰',
-                  style: TextStyle(
-                    fontSize: 22,
-                  ),
-                ),
+                child: const Text('💰', style: TextStyle(fontSize: 22)),
               ),
 
-              const SizedBox(
-                width: 12,
-              ),
+              const SizedBox(width: 12),
 
               const Expanded(
                 child: Text(
                   'Monthly Balance',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Color(
-                      0xFF55746A,
-                    ),
-                    fontWeight:
-                        FontWeight
-                            .w600,
+                    color: Color(0xFF55746A),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -849,16 +589,10 @@ class _HistoryScreenState
                 'RM ${monthBalance.toStringAsFixed(2)}',
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight:
-                      FontWeight.w800,
-                  color:
-                      monthBalance >= 0
-                          ? const Color(
-                              0xFF277765,
-                            )
-                          : const Color(
-                              0xFFA64E4E,
-                            ),
+                  fontWeight: FontWeight.w800,
+                  color: monthBalance >= 0
+                      ? const Color(0xFF277765)
+                      : const Color(0xFFA64E4E),
                 ),
               ),
             ],
@@ -872,18 +606,10 @@ class _HistoryScreenState
             Expanded(
               child: _summaryCard(
                 emoji: '💚',
-                title:
-                    'Total Income',
-                amount:
-                    totalIncome,
-                background:
-                    const Color(
-                  0xFFE1F4EC,
-                ),
-                textColor:
-                    const Color(
-                  0xFF347B69,
-                ),
+                title: 'Total Income',
+                amount: totalIncome,
+                background: const Color(0xFFE1F4EC),
+                textColor: const Color(0xFF347B69),
               ),
             ),
 
@@ -892,18 +618,10 @@ class _HistoryScreenState
             Expanded(
               child: _summaryCard(
                 emoji: '🌸',
-                title:
-                    'Total Expenses',
-                amount:
-                    totalExpense,
-                background:
-                    const Color(
-                  0xFFFFE6E8,
-                ),
-                textColor:
-                    const Color(
-                  0xFFA64E4E,
-                ),
+                title: 'Total Expenses',
+                amount: totalExpense,
+                background: const Color(0xFFFFE6E8),
+                textColor: const Color(0xFFA64E4E),
               ),
             ),
           ],
@@ -920,75 +638,47 @@ class _HistoryScreenState
     required Color textColor,
   }) {
     return Container(
-      padding:
-          const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: background,
-        borderRadius:
-            BorderRadius.circular(20),
-        border: Border.all(
-          color:
-              textColor.withOpacity(
-            0.08,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: textColor.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
           Container(
             width: 38,
             height: 38,
-            alignment:
-                Alignment.center,
-            decoration:
-                BoxDecoration(
-              color:
-                  Colors.white
-                      .withOpacity(
-                0.75,
-              ),
-              shape:
-                  BoxShape.circle,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.75),
+              shape: BoxShape.circle,
             ),
-            child: Text(
-              emoji,
-              style:
-                  const TextStyle(
-                fontSize: 19,
-              ),
-            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 19)),
           ),
 
-          const SizedBox(
-            height: 7,
-          ),
+          const SizedBox(height: 7),
 
           Text(
             title,
-            textAlign:
-                TextAlign.center,
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: textColor,
               fontSize: 11,
-              fontWeight:
-                  FontWeight.w600,
+              fontWeight: FontWeight.w600,
             ),
           ),
 
-          const SizedBox(
-            height: 5,
-          ),
+          const SizedBox(height: 5),
 
           FittedBox(
-            fit:
-                BoxFit.scaleDown,
+            fit: BoxFit.scaleDown,
             child: Text(
               'RM ${amount.toStringAsFixed(2)}',
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,
-                fontWeight:
-                    FontWeight.w800,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -1004,155 +694,71 @@ class _HistoryScreenState
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
-      margin:
-          const EdgeInsets.only(
-        top: 5,
-      ),
-      padding:
-          const EdgeInsets
-              .symmetric(
-        vertical: 36,
-        horizontal: 20,
-      ),
+      margin: const EdgeInsets.only(top: 5),
+      padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
       decoration: BoxDecoration(
-        gradient:
-            const LinearGradient(
-          colors: [
-            Colors.white,
-            Color(0xFFFFF5F2),
-          ],
+        gradient: const LinearGradient(
+          colors: [Colors.white, Color(0xFFFFF5F2)],
         ),
-        borderRadius:
-            BorderRadius.circular(
-          24,
-        ),
-        border: Border.all(
-          color:
-              const Color(
-            0xFFF1E6E3,
-          ),
-        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFF1E6E3)),
       ),
       child: Column(
         children: [
           Container(
             width: 70,
             height: 70,
-            alignment:
-                Alignment.center,
-            decoration:
-                const BoxDecoration(
-              color:
-                  Color(
-                0xFFFFE9ED,
-              ),
-              shape:
-                  BoxShape.circle,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFE9ED),
+              shape: BoxShape.circle,
             ),
-            child:
-                const Text(
-              '🌱',
-              style:
-                  TextStyle(
-                fontSize: 35,
-              ),
-            ),
+            child: const Text('🌱', style: TextStyle(fontSize: 35)),
           ),
 
-          const SizedBox(
-            height: 13,
-          ),
+          const SizedBox(height: 13),
 
           Text(
             'No transactions in '
             '$selectedMonthLabel',
-            textAlign:
-                TextAlign.center,
-            style:
-                const TextStyle(
+            textAlign: TextAlign.center,
+            style: const TextStyle(
               fontSize: 15,
-              fontWeight:
-                  FontWeight.w700,
-              color:
-                  Color(
-                0xFF4F4643,
-              ),
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF4F4643),
             ),
           ),
 
-          const SizedBox(
-            height: 6,
-          ),
+          const SizedBox(height: 6),
 
           const Text(
             'Your wallet is having '
             'a peaceful month ✨',
-            textAlign:
-                TextAlign.center,
-            style: TextStyle(
-              color:
-                  Color(
-                0xFF9A8D88,
-              ),
-              fontSize: 12,
-            ),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF9A8D88), fontSize: 12),
           ),
 
-          const SizedBox(
-            height: 17,
-          ),
+          const SizedBox(height: 17),
 
           ElevatedButton(
-            onPressed:
-                widget
-                    .onAddTransaction,
-            style:
-                ElevatedButton
-                    .styleFrom(
+            onPressed: widget.onAddTransaction,
+            style: ElevatedButton.styleFrom(
               elevation: 0,
-              backgroundColor:
-                  const Color(
-                0xFF77B6A5,
-              ),
-              foregroundColor:
-                  Colors.white,
-              padding:
-                  const EdgeInsets
-                      .symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
-              shape:
-                  RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius
-                        .circular(
-                  22,
-                ),
+              backgroundColor: const Color(0xFF77B6A5),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
               ),
             ),
             child: const Row(
-              mainAxisSize:
-                  MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  '🌸',
-                  style:
-                      TextStyle(
-                    fontSize: 15,
-                  ),
-                ),
-                SizedBox(
-                  width: 7,
-                ),
+                Text('🌸', style: TextStyle(fontSize: 15)),
+                SizedBox(width: 7),
                 Text(
                   'Add Transaction',
-                  style:
-                      TextStyle(
-                    fontWeight:
-                        FontWeight
-                            .w700,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -1166,78 +772,40 @@ class _HistoryScreenState
   // TRANSACTION CARD
   // =========================================================
 
-  Widget _buildTransactionCard(
-    TransactionItem transaction,
-  ) {
-    final categoryColor =
-        getCategoryColor(
-      transaction.category,
-    );
+  Widget _buildTransactionCard(TransactionItem transaction) {
+    final categoryColor = getCategoryColor(transaction.category);
 
     return Dismissible(
-      key:
-          ValueKey(transaction.id),
-      direction:
-          DismissDirection
-              .endToStart,
+      key: ValueKey(transaction.id),
+      direction: DismissDirection.endToStart,
 
-      confirmDismiss: (_) =>
-          _confirmDelete(
-        transaction,
-      ),
+      confirmDismiss: (_) => _confirmDelete(transaction),
 
       onDismissed: (_) {
-        widget.onDeleteTransaction(
-          transaction,
-        );
+        widget.onDeleteTransaction(transaction);
       },
 
       // DELETE BACKGROUND
       background: Container(
-        margin:
-            const EdgeInsets.only(
-          bottom: 11,
-        ),
-        padding:
-            const EdgeInsets
-                .symmetric(
-          horizontal: 22,
-        ),
-        alignment:
-            Alignment.centerRight,
+        margin: const EdgeInsets.only(bottom: 11),
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        alignment: Alignment.centerRight,
         decoration: BoxDecoration(
-          color:
-              const Color(
-            0xFFE47B7B,
-          ),
-          borderRadius:
-              BorderRadius.circular(
-            20,
-          ),
+          color: const Color(0xFFE47B7B),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(
-          mainAxisAlignment:
-              MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Text(
-              '🗑️',
-              style:
-                  TextStyle(
-                fontSize: 19,
-              ),
-            ),
+            Text('🗑️', style: TextStyle(fontSize: 19)),
 
             SizedBox(width: 7),
 
             Text(
               'Delete',
-              style:
-                  TextStyle(
-                color:
-                    Colors.white,
-                fontWeight:
-                    FontWeight
-                        .w700,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -1246,51 +814,21 @@ class _HistoryScreenState
 
       child: InkWell(
         onTap: () {
-          widget.onEditTransaction(
-            transaction,
-          );
+          widget.onEditTransaction(transaction);
         },
-        borderRadius:
-            BorderRadius.circular(
-          20,
-        ),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          margin:
-              const EdgeInsets.only(
-            bottom: 11,
-          ),
-          padding:
-              const EdgeInsets.all(
-            13,
-          ),
+          margin: const EdgeInsets.only(bottom: 11),
+          padding: const EdgeInsets.all(13),
           decoration: BoxDecoration(
-            color:
-                Colors.white,
-            borderRadius:
-                BorderRadius
-                    .circular(
-              20,
-            ),
-            border: Border.all(
-              color:
-                  categoryColor
-                      .withOpacity(
-                0.30,
-              ),
-            ),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: categoryColor.withValues(alpha: 0.30)),
             boxShadow: [
               BoxShadow(
-                color:
-                    categoryColor
-                        .withOpacity(
-                  0.08,
-                ),
+                color: categoryColor.withValues(alpha: 0.08),
                 blurRadius: 12,
-                offset:
-                    const Offset(
-                  0,
-                  5,
-                ),
+                offset: const Offset(0, 5),
               ),
             ],
           ),
@@ -1300,129 +838,75 @@ class _HistoryScreenState
               Container(
                 width: 50,
                 height: 50,
-                alignment:
-                    Alignment.center,
-                decoration:
-                    BoxDecoration(
-                  color: transaction
-                          .income
-                      ? const Color(
-                          0xFFE1F4E9,
-                        )
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: transaction.income
+                      ? const Color(0xFFE1F4E9)
                       : categoryColor,
-                  borderRadius:
-                      BorderRadius
-                          .circular(
-                    16,
-                  ),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   transaction.emoji,
-                  style:
-                      const TextStyle(
-                    fontSize: 24,
-                  ),
+                  style: const TextStyle(fontSize: 24),
                 ),
               ),
 
-              const SizedBox(
-                width: 13,
-              ),
+              const SizedBox(width: 13),
 
               // DETAILS
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment
-                          .start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       transaction.title,
                       maxLines: 1,
-                      overflow:
-                          TextOverflow
-                              .ellipsis,
-                      style:
-                          const TextStyle(
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
                         fontSize: 14,
-                        fontWeight:
-                            FontWeight
-                                .w700,
-                        color:
-                            Color(
-                          0xFF403633,
-                        ),
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF403633),
                       ),
                     ),
 
-                    const SizedBox(
-                      height: 4,
-                    ),
+                    const SizedBox(height: 4),
 
                     Row(
                       children: [
                         Flexible(
                           child: Text(
-                            transaction
-                                .category,
-                            overflow:
-                                TextOverflow
-                                    .ellipsis,
-                            style:
-                                const TextStyle(
-                              color:
-                                  Color(
-                                0xFF908480,
-                              ),
-                              fontSize:
-                                  11,
+                            transaction.category,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF908480),
+                              fontSize: 11,
                             ),
                           ),
                         ),
 
                         const Text(
                           '  •  ',
-                          style:
-                              TextStyle(
-                            color:
-                                Color(
-                              0xFFC1B5B1,
-                            ),
-                            fontSize:
-                                10,
+                          style: TextStyle(
+                            color: Color(0xFFC1B5B1),
+                            fontSize: 10,
                           ),
                         ),
 
                         Text(
-                          formatDate(
-                            transaction
-                                .date,
-                          ),
-                          style:
-                              const TextStyle(
-                            color:
-                                Color(
-                              0xFF74B9A8,
-                            ),
-                            fontSize:
-                                10.5,
-                            fontWeight:
-                                FontWeight.w600,
+                          formatDate(transaction.date),
+                          style: const TextStyle(
+                            color: Color(0xFF74B9A8),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
 
-                        if (transaction.receipt !=
-                            null) ...[
-                          const SizedBox(
-                            width: 6,
-                          ),
+                        if (transaction.receipt != null) ...[
+                          const SizedBox(width: 6),
                           const Icon(
-                            Icons
-                                .attach_file_rounded,
+                            Icons.attach_file_rounded,
                             size: 11,
-                            color: Color(
-                              0xFF9A8D88,
-                            ),
+                            color: Color(0xFF9A8D88),
                           ),
                         ],
                       ],
@@ -1431,66 +915,38 @@ class _HistoryScreenState
                 ),
               ),
 
-              const SizedBox(
-                width: 8,
-              ),
+              const SizedBox(width: 8),
 
               // AMOUNT
               Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment
-                        .end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     '${transaction.income ? '+' : '-'} '
                     'RM ${transaction.amount.toStringAsFixed(2)}',
-                    style:
-                        TextStyle(
-                      color: transaction
-                              .income
-                          ? const Color(
-                              0xFF347B69,
-                            )
-                          : const Color(
-                              0xFFA64E4E,
-                            ),
-                      fontWeight:
-                          FontWeight
-                              .w800,
+                    style: TextStyle(
+                      color: transaction.income
+                          ? const Color(0xFF347B69)
+                          : const Color(0xFFA64E4E),
+                      fontWeight: FontWeight.w800,
                       fontSize: 13,
                     ),
                   ),
 
-                  const SizedBox(
-                    height: 6,
-                  ),
+                  const SizedBox(height: 6),
 
                   Container(
                     width: 29,
                     height: 25,
-                    alignment:
-                        Alignment.center,
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          const Color(
-                        0xFFFFF1F1,
-                      ),
-                      borderRadius:
-                          BorderRadius
-                              .circular(
-                        9,
-                      ),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF1F1),
+                      borderRadius: BorderRadius.circular(9),
                     ),
-                    child:
-                        const Icon(
-                      Icons
-                          .edit_outlined,
+                    child: const Icon(
+                      Icons.edit_outlined,
                       size: 14,
-                      color:
-                          Color(
-                        0xFFB58C8C,
-                      ),
+                      color: Color(0xFFB58C8C),
                     ),
                   ),
                 ],
@@ -1506,186 +962,93 @@ class _HistoryScreenState
   // DELETE CONFIRMATION
   // =========================================================
 
-  Future<bool> _confirmDelete(
-    TransactionItem transaction,
-  ) async {
-    final confirmed =
-        await showDialog<bool>(
+  Future<bool> _confirmDelete(TransactionItem transaction) async {
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (
-        dialogContext,
-      ) {
+      builder: (dialogContext) {
         return Dialog(
-          backgroundColor:
-              Colors.transparent,
+          backgroundColor: Colors.transparent,
           child: Container(
-            padding:
-                const EdgeInsets.all(
-              22,
-            ),
-            decoration:
-                BoxDecoration(
-              color:
-                  const Color(
-                0xFFFFF8F6,
-              ),
-              borderRadius:
-                  BorderRadius
-                      .circular(
-                28,
-              ),
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF8F6),
+              borderRadius: BorderRadius.circular(28),
             ),
             child: Column(
-              mainAxisSize:
-                  MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: 65,
                   height: 65,
-                  alignment:
-                      Alignment.center,
-                  decoration:
-                      const BoxDecoration(
-                    color:
-                        Color(
-                      0xFFFFE3E6,
-                    ),
-                    shape:
-                        BoxShape.circle,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFE3E6),
+                    shape: BoxShape.circle,
                   ),
-                  child:
-                      const Text(
-                    '🥺',
-                    style:
-                        TextStyle(
-                      fontSize:
-                          33,
-                    ),
-                  ),
+                  child: const Text('🥺', style: TextStyle(fontSize: 33)),
                 ),
 
-                const SizedBox(
-                  height: 14,
-                ),
+                const SizedBox(height: 14),
 
                 const Text(
                   'Delete transaction?',
-                  style:
-                      TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
-                    fontWeight:
-                        FontWeight
-                            .w800,
-                    color:
-                        Color(
-                      0xFF403633,
-                    ),
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF403633),
                   ),
                 ),
 
-                const SizedBox(
-                  height: 8,
-                ),
+                const SizedBox(height: 8),
 
                 Text(
                   'Are you sure you want to delete '
                   '"${transaction.title}"?',
-                  textAlign:
-                      TextAlign.center,
-                  style:
-                      const TextStyle(
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontSize: 12,
-                    color:
-                        Color(
-                      0xFF8B7C77,
-                    ),
+                    color: Color(0xFF8B7C77),
                   ),
                 ),
 
-                const SizedBox(
-                  height: 22,
-                ),
+                const SizedBox(height: 22),
 
                 Row(
                   children: [
                     Expanded(
-                      child:
-                          OutlinedButton(
+                      child: OutlinedButton(
                         onPressed: () {
-                          Navigator.pop(
-                            dialogContext,
-                            false,
-                          );
+                          Navigator.pop(dialogContext, false);
                         },
-                        style:
-                            OutlinedButton
-                                .styleFrom(
-                          foregroundColor:
-                              const Color(
-                            0xFF756865,
-                          ),
-                          side:
-                              const BorderSide(
-                            color:
-                                Color(
-                              0xFFE6DAD7,
-                            ),
-                          ),
-                          shape:
-                              RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                              18,
-                            ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF756865),
+                          side: const BorderSide(color: Color(0xFFE6DAD7)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        child:
-                            const Text(
-                          'Keep it 🌷',
-                        ),
+                        child: const Text('Keep it 🌷'),
                       ),
                     ),
 
-                    const SizedBox(
-                      width: 10,
-                    ),
+                    const SizedBox(width: 10),
 
                     Expanded(
-                      child:
-                          ElevatedButton(
+                      child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(
-                            dialogContext,
-                            true,
-                          );
+                          Navigator.pop(dialogContext, true);
                         },
-                        style:
-                            ElevatedButton
-                                .styleFrom(
+                        style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor:
-                              const Color(
-                            0xFFE47B7B,
-                          ),
-                          foregroundColor:
-                              Colors.white,
-                          shape:
-                              RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                              18,
-                            ),
+                          backgroundColor: const Color(0xFFE47B7B),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        child:
-                            const Text(
+                        child: const Text(
                           'Delete',
-                          style:
-                              TextStyle(
-                            fontWeight:
-                                FontWeight
-                                    .w700,
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
                     ),
@@ -1705,44 +1068,28 @@ class _HistoryScreenState
   // CATEGORY COLOR
   // =========================================================
 
-  Color getCategoryColor(
-    String category,
-  ) {
+  Color getCategoryColor(String category) {
     switch (category) {
       case 'Food':
-        return const Color(
-          0xFFFFE8C8,
-        );
+        return const Color(0xFFFFE8C8);
 
       case 'Transport':
-        return const Color(
-          0xFFFFE0E4,
-        );
+        return const Color(0xFFFFE0E4);
 
       case 'Shopping':
-        return const Color(
-          0xFFE6E1FF,
-        );
+        return const Color(0xFFE6E1FF);
 
       case 'Bills':
-        return const Color(
-          0xFFFFF4BF,
-        );
+        return const Color(0xFFFFF4BF);
 
       case 'Family':
-        return const Color(
-          0xFFDFF3EB,
-        );
+        return const Color(0xFFDFF3EB);
 
       case 'Health':
-        return const Color(
-          0xFFFFDDE5,
-        );
+        return const Color(0xFFFFDDE5);
 
       default:
-        return const Color(
-          0xFFFFECE9,
-        );
+        return const Color(0xFFFFECE9);
     }
   }
 
@@ -1750,9 +1097,7 @@ class _HistoryScreenState
   // FORMAT DATE
   // =========================================================
 
-  String formatDate(
-    DateTime date,
-  ) {
+  String formatDate(DateTime date) {
     const shortMonths = [
       'Jan',
       'Feb',

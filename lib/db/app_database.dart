@@ -56,9 +56,7 @@ class AppDatabase {
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
-          await db.execute(
-            'ALTER TABLE transactions ADD COLUMN receipt BLOB',
-          );
+          await db.execute('ALTER TABLE transactions ADD COLUMN receipt BLOB');
         }
 
         if (oldVersion < 3) {
@@ -141,11 +139,10 @@ class AppDatabase {
   Future<void> setBudgetLimit(String category, double limit) async {
     final db = await _db;
 
-    await db.insert(
-      'budget_limits',
-      {'category': category, 'budget_limit': limit},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('budget_limits', {
+      'category': category,
+      'budget_limit': limit,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // =========================================================
@@ -165,10 +162,10 @@ class AppDatabase {
   }) async {
     final db = await _db;
 
-    await db.insert(
-      'custom_categories',
-      {'title': title, 'emoji': emoji, 'color': color},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('custom_categories', {
+      'title': title,
+      'emoji': emoji,
+      'color': color,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }

@@ -33,9 +33,7 @@ class MyXpensesApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFFFF8F6),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF74B9A8),
-        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF74B9A8)),
       ),
       home: const MainScreen(),
     );
@@ -129,9 +127,9 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex = 0;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Transaction saved ✅')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Transaction saved ✅')));
     } else {
       await AppDatabase.instance.updateTransaction(result);
 
@@ -145,9 +143,9 @@ class _MainScreenState extends State<MainScreen> {
         }
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Transaction updated ✅')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Transaction updated ✅')));
     }
   }
 
@@ -271,9 +269,7 @@ class _MainScreenState extends State<MainScreen> {
       return const Scaffold(
         backgroundColor: Color(0xFFFFF8F6),
         body: Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF277765),
-          ),
+          child: CircularProgressIndicator(color: Color(0xFF277765)),
         ),
       );
     }
@@ -284,16 +280,13 @@ class _MainScreenState extends State<MainScreen> {
       // ==============================
       // BOTTOM MENU
       // ==============================
-
       bottomNavigationBar: Container(
         height: 85,
 
         decoration: const BoxDecoration(
           color: Colors.white,
 
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(24),
-          ),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
 
           boxShadow: [
             BoxShadow(
@@ -325,7 +318,6 @@ class _MainScreenState extends State<MainScreen> {
               // ========================
               // REPORT
               // ========================
-
               _navItem(
                 icon: Icons.bar_chart_outlined,
                 activeIcon: Icons.bar_chart_rounded,
@@ -336,7 +328,6 @@ class _MainScreenState extends State<MainScreen> {
               // ========================
               // ADD
               // ========================
-
               GestureDetector(
                 onTap: openAddTransaction,
 
@@ -368,7 +359,6 @@ class _MainScreenState extends State<MainScreen> {
               // ========================
               // HISTORY
               // ========================
-
               _navItem(
                 icon: Icons.receipt_long_outlined,
                 activeIcon: Icons.receipt_long_rounded,
@@ -379,7 +369,6 @@ class _MainScreenState extends State<MainScreen> {
               // ========================
               // BUDGET
               // ========================
-
               _navItem(
                 icon: Icons.account_balance_wallet_outlined,
                 activeIcon: Icons.account_balance_wallet_rounded,
@@ -424,11 +413,7 @@ class _MainScreenState extends State<MainScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-            Icon(
-              active ? activeIcon : icon,
-              color: color,
-              size: 24,
-            ),
+            Icon(active ? activeIcon : icon, color: color, size: 24),
 
             const SizedBox(height: 4),
 
@@ -439,9 +424,7 @@ class _MainScreenState extends State<MainScreen> {
                 color: color,
                 fontSize: 10,
 
-                fontWeight: active
-                    ? FontWeight.w700
-                    : FontWeight.w500,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],
