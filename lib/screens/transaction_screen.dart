@@ -77,6 +77,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       selectedCategory = existing.category;
       selectedDate = existing.date;
       receiptBytes = existing.receipt;
+      selectedPaymentMethod = existing.paymentMethod;
+      selectedWallet = existing.wallet;
+      noteController.text = existing.note;
     }
   }
 
@@ -198,13 +201,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       income: isIncome,
       date: selectedDate,
       receipt: receiptBytes,
-
-      // Kalau model TransactionItem kau belum ada field ni,
-      // jangan masukkan dulu.
-      //
-      // paymentMethod: selectedPaymentMethod,
-      // wallet: selectedWallet,
-      // note: noteController.text.trim(),
+      paymentMethod: selectedPaymentMethod,
+      wallet: selectedWallet,
+      note: noteController.text.trim(),
     );
 
     Navigator.pop(

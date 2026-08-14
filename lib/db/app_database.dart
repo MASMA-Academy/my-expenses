@@ -22,7 +22,7 @@ class AppDatabase {
 
     return openDatabase(
       dbPath,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE transactions (
@@ -32,7 +32,10 @@ class AppDatabase {
             amount REAL NOT NULL,
             income INTEGER NOT NULL,
             date TEXT NOT NULL,
-            receipt BLOB
+            receipt BLOB,
+            payment_method TEXT NOT NULL DEFAULT 'Cash',
+            wallet TEXT NOT NULL DEFAULT 'Cash',
+            note TEXT NOT NULL DEFAULT ''
           )
         ''');
 
@@ -47,6 +50,18 @@ class AppDatabase {
         if (oldVersion < 2) {
           await db.execute(
             'ALTER TABLE transactions ADD COLUMN receipt BLOB',
+          );
+        }
+
+        if (oldVersion < 3) {
+          await db.execute(
+            "ALTER TABLE transactions ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'Cash'",
+          );
+          await db.execute(
+            "ALTER TABLE transactions ADD COLUMN wallet TEXT NOT NULL DEFAULT 'Cash'",
+          );
+          await db.execute(
+            "ALTER TABLE transactions ADD COLUMN note TEXT NOT NULL DEFAULT ''",
           );
         }
       },
