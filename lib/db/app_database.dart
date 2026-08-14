@@ -22,7 +22,7 @@ class AppDatabase {
 
     return openDatabase(
       dbPath,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE transactions (
@@ -31,7 +31,8 @@ class AppDatabase {
             category TEXT NOT NULL,
             amount REAL NOT NULL,
             income INTEGER NOT NULL,
-            date TEXT NOT NULL
+            date TEXT NOT NULL,
+            receipt BLOB
           )
         ''');
 
@@ -41,6 +42,13 @@ class AppDatabase {
             budget_limit REAL NOT NULL
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE transactions ADD COLUMN receipt BLOB',
+          );
+        }
       },
     );
   }
