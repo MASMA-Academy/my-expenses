@@ -6,11 +6,13 @@ import '../db/app_database.dart';
 class BudgetScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
   final VoidCallback onAddTransaction;
+  final Future<void> Function() onReload;
 
   const BudgetScreen({
     super.key,
     required this.transactions,
     required this.onAddTransaction,
+    required this.onReload,
   });
 
   @override
@@ -101,6 +103,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
         }
       }
     });
+  }
+
+  Future<void> _handleReload() async {
+    await widget.onReload();
+    await _loadBudgetLimits();
   }
 
   // =========================================================
@@ -764,9 +771,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
   // =========================================================
 
   Widget _buildHeader() {
-    return const Row(
+    return Row(
       children: [
-        Text(
+        const Text(
           'MyXpenses',
           style: TextStyle(
             fontSize: 24,
@@ -778,9 +785,17 @@ class _BudgetScreenState extends State<BudgetScreen> {
           ),
         ),
 
-        Spacer(),
+        const Spacer(),
 
-        Text(
+        IconButton(
+          onPressed: _handleReload,
+          icon: const Icon(
+            Icons.refresh_rounded,
+            color: Color(0xFF277765),
+          ),
+        ),
+
+        const Text(
           '💰',
           style: TextStyle(
             fontSize: 25,
