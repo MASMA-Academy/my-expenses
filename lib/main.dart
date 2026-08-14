@@ -154,8 +154,36 @@ class _MainScreenState extends State<MainScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Transaction deleted 🗑️')),
+      SnackBar(
+        content: const Text('Transaction deleted 🗑️'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () => _undoDelete(item),
+        ),
+      ),
     );
+  }
+
+  Future<void> _undoDelete(TransactionItem item) async {
+    final restored = await AppDatabase.instance.insertTransaction(
+      TransactionItem(
+        title: item.title,
+        category: item.category,
+        amount: item.amount,
+        income: item.income,
+        date: item.date,
+        receipt: item.receipt,
+        paymentMethod: item.paymentMethod,
+        wallet: item.wallet,
+        note: item.note,
+      ),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      transactions.add(restored);
+    });
   }
 
   // ==============================
