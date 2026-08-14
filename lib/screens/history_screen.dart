@@ -33,6 +33,19 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState
     extends State<HistoryScreen> {
   // =========================================================
+  // SEARCH
+  // =========================================================
+
+  final searchController = TextEditingController();
+  String searchQuery = '';
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  // =========================================================
   // FILTER
   // =========================================================
 
@@ -112,6 +125,16 @@ class _HistoryScreenState
           .where(
             (transaction) =>
                 !transaction.income,
+          )
+          .toList();
+    }
+
+    if (searchQuery.trim().isNotEmpty) {
+      final query = searchQuery.trim().toLowerCase();
+
+      result = result
+          .where(
+            (transaction) => transaction.title.toLowerCase().contains(query),
           )
           .toList();
     }
@@ -233,6 +256,14 @@ class _HistoryScreenState
               ),
 
               const SizedBox(height: 24),
+
+              // =============================
+              // SEARCH
+              // =============================
+
+              _buildSearchField(),
+
+              const SizedBox(height: 14),
 
               // =============================
               // FILTER
@@ -415,6 +446,68 @@ class _HistoryScreenState
           ),
         ),
       ],
+    );
+  }
+
+  // =========================================================
+  // SEARCH FIELD
+  // =========================================================
+
+  Widget _buildSearchField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: searchController,
+        onChanged: (value) {
+          setState(() {
+            searchQuery = value;
+          });
+        },
+        decoration: InputDecoration(
+          hintText: 'Search transactions...',
+          hintStyle: const TextStyle(
+            color: Color(0xFF9A8D88),
+            fontSize: 13,
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: Color(0xFF9A8D88),
+          ),
+          suffixIcon: searchQuery.isEmpty
+              ? null
+              : IconButton(
+                  onPressed: () {
+                    searchController.clear();
+
+                    setState(() {
+                      searchQuery = '';
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Color(0xFF9A8D88),
+                    size: 18,
+                  ),
+                ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(18),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
     );
   }
 
