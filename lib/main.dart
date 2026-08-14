@@ -110,14 +110,22 @@ class _MainScreenState extends State<MainScreen> {
     if (result.id == null) {
       final inserted = await AppDatabase.instance.insertTransaction(result);
 
+      if (!mounted) return;
+
       setState(() {
         transactions.add(inserted);
 
         // Lepas save balik Dashboard
         currentIndex = 0;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaction saved ✅')),
+      );
     } else {
       await AppDatabase.instance.updateTransaction(result);
+
+      if (!mounted) return;
 
       setState(() {
         final index = transactions.indexWhere((t) => t.id == result.id);
@@ -126,6 +134,10 @@ class _MainScreenState extends State<MainScreen> {
           transactions[index] = result;
         }
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaction updated ✅')),
+      );
     }
   }
 
@@ -135,9 +147,15 @@ class _MainScreenState extends State<MainScreen> {
 
     await AppDatabase.instance.deleteTransaction(id);
 
+    if (!mounted) return;
+
     setState(() {
       transactions.removeWhere((t) => t.id == id);
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Transaction deleted 🗑️')),
+    );
   }
 
   // ==============================
