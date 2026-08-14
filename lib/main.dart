@@ -166,6 +166,7 @@ class _MainScreenState extends State<MainScreen> {
           onOpenHistory: () {
             changePage(3);
           },
+          onEditTransaction: openEditTransaction,
         );
 
       case 1:
@@ -194,6 +195,7 @@ class _MainScreenState extends State<MainScreen> {
           onOpenHistory: () {
             changePage(3);
           },
+          onEditTransaction: openEditTransaction,
         );
     }
   }
