@@ -1306,6 +1306,21 @@ class _HistoryScreenState
                                 FontWeight.w600,
                           ),
                         ),
+
+                        if (transaction.receipt !=
+                            null) ...[
+                          const SizedBox(
+                            width: 6,
+                          ),
+                          const Icon(
+                            Icons
+                                .attach_file_rounded,
+                            size: 11,
+                            color: Color(
+                              0xFF9A8D88,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],
