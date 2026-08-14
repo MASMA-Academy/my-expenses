@@ -13,6 +13,7 @@ class HistoryScreen extends StatefulWidget {
   final void Function(TransactionItem transaction) onDeleteTransaction;
 
   final Future<void> Function() onReload;
+  final List<Map<String, dynamic>> customCategories;
 
   const HistoryScreen({
     super.key,
@@ -21,6 +22,7 @@ class HistoryScreen extends StatefulWidget {
     required this.onEditTransaction,
     required this.onDeleteTransaction,
     required this.onReload,
+    this.customCategories = const [],
   });
 
   @override
@@ -881,7 +883,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  transaction.emoji,
+                  emojiFor(transaction),
                   style: const TextStyle(fontSize: 24),
                 ),
               ),
@@ -1124,8 +1126,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return const Color(0xFFFFDDE5);
 
       default:
+        for (final custom in widget.customCategories) {
+          if (custom['title'] == category) {
+            return Color(custom['color'] as int);
+          }
+        }
+
         return const Color(0xFFFFECE9);
     }
+  }
+
+  String emojiFor(TransactionItem transaction) {
+    if (!transaction.income) {
+      for (final custom in widget.customCategories) {
+        if (custom['title'] == transaction.category) {
+          return custom['emoji'] as String;
+        }
+      }
+    }
+
+    return transaction.emoji;
   }
 
   // =========================================================

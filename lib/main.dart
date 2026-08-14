@@ -84,7 +84,7 @@ class _MainScreenState extends State<MainScreen> {
   // ==============================
 
   List<TransactionItem> transactions = [];
-  List<String> customCategoryNames = [];
+  List<Map<String, dynamic>> customCategories = [];
   bool _loading = true;
   bool _locked = false;
   bool _hasPin = false;
@@ -110,15 +110,14 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _loadTransactions() async {
     final loaded = await AppDatabase.instance.getTransactions();
-    final customCategories = await AppDatabase.instance.getCustomCategories();
+    final loadedCustomCategories = await AppDatabase.instance
+        .getCustomCategories();
 
     if (!mounted) return;
 
     setState(() {
       transactions = loaded;
-      customCategoryNames = customCategories
-          .map((row) => row['title'] as String)
-          .toList();
+      customCategories = loadedCustomCategories;
       _loading = false;
     });
   }
@@ -141,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
       MaterialPageRoute(
         builder: (context) => AddTransactionScreen(
           existing: existing,
-          extraCategories: customCategoryNames,
+          customCategories: customCategories,
         ),
       ),
     );
@@ -563,12 +562,14 @@ class _MainScreenState extends State<MainScreen> {
           onEditTransaction: openEditTransaction,
           onReload: _loadTransactions,
           onManageLock: _showManageLockSheet,
+          customCategories: customCategories,
         );
 
       case 1:
         return ReportScreen(
           transactions: transactions,
           onReload: _loadTransactions,
+          customCategories: customCategories,
         );
 
       case 3:
@@ -578,6 +579,7 @@ class _MainScreenState extends State<MainScreen> {
           onEditTransaction: openEditTransaction,
           onDeleteTransaction: deleteTransaction,
           onReload: _loadTransactions,
+          customCategories: customCategories,
         );
 
       case 4:
@@ -597,6 +599,7 @@ class _MainScreenState extends State<MainScreen> {
           onEditTransaction: openEditTransaction,
           onReload: _loadTransactions,
           onManageLock: _showManageLockSheet,
+          customCategories: customCategories,
         );
     }
   }

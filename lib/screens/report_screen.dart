@@ -9,11 +9,13 @@ import '../models/transaction_item.dart';
 class ReportScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
   final Future<void> Function() onReload;
+  final List<Map<String, dynamic>> customCategories;
 
   const ReportScreen({
     super.key,
     required this.transactions,
     required this.onReload,
+    this.customCategories = const [],
   });
 
   @override
@@ -285,9 +287,18 @@ class _ReportScreenState extends State<ReportScreen> {
   // CATEGORY BREAKDOWN
   // =========================================================
 
+  Set<String> get _customCategoryNames {
+    return widget.customCategories
+        .map((category) => category['title'] as String)
+        .toSet();
+  }
+
   Map<String, double> get _categoryBreakdown {
+    final customNames = _customCategoryNames;
+
     final Map<String, double> totals = {
       for (final category in _knownCategories) category: 0.0,
+      for (final category in customNames) category: 0.0,
       'Others': 0.0,
     };
 
@@ -296,9 +307,11 @@ class _ReportScreenState extends State<ReportScreen> {
         continue;
       }
 
-      final key = _knownCategories.contains(transaction.category)
-          ? transaction.category
-          : 'Others';
+      final isKnown =
+          _knownCategories.contains(transaction.category) ||
+          customNames.contains(transaction.category);
+
+      final key = isKnown ? transaction.category : 'Others';
 
       totals[key] = (totals[key] ?? 0) + transaction.amount;
     }
@@ -1250,6 +1263,12 @@ class _ReportScreenState extends State<ReportScreen> {
         return const Color(0xFFFFAFC1);
 
       default:
+        for (final custom in widget.customCategories) {
+          if (custom['title'] == category) {
+            return Color(custom['color'] as int);
+          }
+        }
+
         return const Color(0xFFDCD5EE);
     }
   }
