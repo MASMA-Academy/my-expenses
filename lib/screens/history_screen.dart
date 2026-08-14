@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../models/transaction_item.dart';
+import '../utils/csv_export.dart';
 
 class HistoryScreen extends StatefulWidget {
   final List<TransactionItem> transactions;
@@ -37,6 +39,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  // =========================================================
+  // EXPORT
+  // =========================================================
+
+  Future<void> _exportToCsv() async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Export isn't available on web yet."),
+        ),
+      );
+
+      return;
+    }
+
+    final path = await exportTransactionsToCsv(widget.transactions);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Exported to $path')),
+    );
   }
 
   // =========================================================
@@ -316,6 +342,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
 
         const Spacer(),
+
+        IconButton(
+          onPressed: _exportToCsv,
+          icon: const Icon(
+            Icons.file_download_outlined,
+            color: Color(0xFF74B9A8),
+          ),
+        ),
 
         IconButton(
           onPressed: widget.onReload,
