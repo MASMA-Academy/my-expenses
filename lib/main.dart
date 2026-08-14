@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
@@ -17,6 +18,17 @@ import 'utils/budget_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Match the system nav/status bars to the app's own light theme instead
+  // of the OS default (often black), which otherwise clashes on some phones.
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   // sqflite only talks to a real filesystem on Android/iOS/macOS.
   // On web it needs the IndexedDB-backed ffi factory instead.
@@ -72,7 +84,7 @@ class _MainScreenState extends State<MainScreen> {
   // ==============================
 
   List<TransactionItem> transactions = [];
-  List<String> customCategoryNames = [];
+  List<Map<String, dynamic>> customCategories = [];
   bool _loading = true;
   bool _locked = false;
   bool _hasPin = false;
@@ -98,15 +110,14 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _loadTransactions() async {
     final loaded = await AppDatabase.instance.getTransactions();
-    final customCategories = await AppDatabase.instance.getCustomCategories();
+    final loadedCustomCategories = await AppDatabase.instance
+        .getCustomCategories();
 
     if (!mounted) return;
 
     setState(() {
       transactions = loaded;
-      customCategoryNames = customCategories
-          .map((row) => row['title'] as String)
-          .toList();
+      customCategories = loadedCustomCategories;
       _loading = false;
     });
   }
@@ -129,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
       MaterialPageRoute(
         builder: (context) => AddTransactionScreen(
           existing: existing,
-          extraCategories: customCategoryNames,
+          customCategories: customCategories,
         ),
       ),
     );
@@ -148,9 +159,12 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex = 0;
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Transaction saved ✅')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transaction saved ✅'),
+          showCloseIcon: true,
+        ),
+      );
 
       await _checkBudgetAndNotify(inserted);
     } else {
@@ -166,9 +180,12 @@ class _MainScreenState extends State<MainScreen> {
         }
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Transaction updated ✅')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transaction updated ✅'),
+          showCloseIcon: true,
+        ),
+      );
 
       await _checkBudgetAndNotify(result);
     }
@@ -222,6 +239,7 @@ class _MainScreenState extends State<MainScreen> {
           label: 'Undo',
           onPressed: () => _undoDelete(item),
         ),
+        showCloseIcon: true,
       ),
     );
   }
@@ -356,7 +374,10 @@ class _MainScreenState extends State<MainScreen> {
               Navigator.pop(sheetContext);
 
               ScaffoldMessenger.of(this.context).showSnackBar(
-                const SnackBar(content: Text('App lock updated 🔒')),
+                const SnackBar(
+                  content: Text('App lock updated 🔒'),
+                  showCloseIcon: true,
+                ),
               );
             }
 
@@ -383,7 +404,10 @@ class _MainScreenState extends State<MainScreen> {
               Navigator.pop(sheetContext);
 
               ScaffoldMessenger.of(this.context).showSnackBar(
-                const SnackBar(content: Text('App lock disabled')),
+                const SnackBar(
+                  content: Text('App lock disabled'),
+                  showCloseIcon: true,
+                ),
               );
             }
 
@@ -538,12 +562,14 @@ class _MainScreenState extends State<MainScreen> {
           onEditTransaction: openEditTransaction,
           onReload: _loadTransactions,
           onManageLock: _showManageLockSheet,
+          customCategories: customCategories,
         );
 
       case 1:
         return ReportScreen(
           transactions: transactions,
           onReload: _loadTransactions,
+          customCategories: customCategories,
         );
 
       case 3:
@@ -553,6 +579,7 @@ class _MainScreenState extends State<MainScreen> {
           onEditTransaction: openEditTransaction,
           onDeleteTransaction: deleteTransaction,
           onReload: _loadTransactions,
+          customCategories: customCategories,
         );
 
       case 4:
@@ -572,6 +599,7 @@ class _MainScreenState extends State<MainScreen> {
           onEditTransaction: openEditTransaction,
           onReload: _loadTransactions,
           onManageLock: _showManageLockSheet,
+          customCategories: customCategories,
         );
     }
   }

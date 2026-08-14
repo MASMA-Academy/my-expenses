@@ -7,12 +7,12 @@ import '../models/transaction_item.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final TransactionItem? existing;
-  final List<String> extraCategories;
+  final List<Map<String, dynamic>> customCategories;
 
   const AddTransactionScreen({
     super.key,
     this.existing,
-    this.extraCategories = const [],
+    this.customCategories = const [],
   });
 
   @override
@@ -55,10 +55,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   final List<String> wallets = ['Cash', 'Maybank', 'TnG E-Wallet', 'ShopeePay'];
 
+  List<String> get customCategoryNames {
+    return widget.customCategories
+        .map((category) => category['title'] as String)
+        .toList();
+  }
+
   List<String> get currentCategories {
     if (isIncome) return incomeCategories;
 
-    return [...expenseCategories, ...widget.extraCategories];
+    return [...expenseCategories, ...customCategoryNames];
   }
 
   @override
@@ -207,7 +213,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void showMessage(String message) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ).showSnackBar(SnackBar(content: Text(message), showCloseIcon: true));
   }
 
   InputDecoration inputDecoration({String? hint, Widget? prefixIcon}) {
@@ -664,6 +670,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         return '🎁';
 
       default:
+        for (final custom in widget.customCategories) {
+          if (custom['title'] == category) {
+            return custom['emoji'] as String;
+          }
+        }
+
         return '💸';
     }
   }

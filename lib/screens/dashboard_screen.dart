@@ -11,6 +11,7 @@ class DashboardScreen extends StatelessWidget {
   final void Function(TransactionItem transaction) onEditTransaction;
   final Future<void> Function() onReload;
   final VoidCallback onManageLock;
+  final List<Map<String, dynamic>> customCategories;
 
   // =========================================================
   // CURRENT GREETING
@@ -101,6 +102,7 @@ class DashboardScreen extends StatelessWidget {
     required this.onEditTransaction,
     required this.onReload,
     required this.onManageLock,
+    this.customCategories = const [],
   });
 
   List<TransactionItem> get currentMonthTransactions {
@@ -144,6 +146,96 @@ class DashboardScreen extends StatelessWidget {
     return currentMonthTransactions
         .where((item) => !item.income && item.category == category)
         .fold(0.0, (sum, item) => sum + item.amount);
+  }
+
+  // =========================================================
+  // CATEGORY METADATA (built-in + custom)
+  // =========================================================
+
+  static const List<String> _defaultOverviewCategories = [
+    'Food',
+    'Transport',
+    'Shopping',
+    'Bills',
+  ];
+
+  static const Map<String, String> _builtInEmoji = {
+    'Food': '🍔',
+    'Transport': '🚗',
+    'Shopping': '🛍️',
+    'Bills': '💡',
+    'Family': '👨‍👩‍👧',
+    'Health': '❤️',
+  };
+
+  static const Map<String, Color> _builtInColor = {
+    'Food': Color(0xFF7EBBA9),
+    'Transport': Color(0xFFFFA6AA),
+    'Shopping': Color(0xFFD9CCFF),
+    'Bills': Color(0xFFFFD89C),
+    'Family': Color(0xFFFFB9A7),
+    'Health': Color(0xFFFF9FB0),
+  };
+
+  String emojiForCategory(String category) {
+    if (_builtInEmoji.containsKey(category)) {
+      return _builtInEmoji[category]!;
+    }
+
+    for (final custom in customCategories) {
+      if (custom['title'] == category) {
+        return custom['emoji'] as String;
+      }
+    }
+
+    return '✨';
+  }
+
+  Color colorForCategory(String category) {
+    if (_builtInColor.containsKey(category)) {
+      return _builtInColor[category]!;
+    }
+
+    for (final custom in customCategories) {
+      if (custom['title'] == category) {
+        return Color(custom['color'] as int);
+      }
+    }
+
+    return const Color(0xFFD6C6FF);
+  }
+
+  String emojiForTransaction(TransactionItem item) {
+    if (item.income) return item.emoji;
+
+    return emojiForCategory(item.category);
+  }
+
+  /// All categories with expense spend this month, keyed to their total.
+  Map<String, double> get _categoryTotals {
+    final Map<String, double> totals = {};
+
+    for (final item in currentMonthTransactions) {
+      if (item.income) continue;
+
+      totals[item.category] = (totals[item.category] ?? 0) + item.amount;
+    }
+
+    return totals;
+  }
+
+  /// The 4 default categories (always shown, even at RM0) followed by any
+  /// other category with actual spend this month, largest first.
+  List<String> get _overviewCategoryOrder {
+    final totals = _categoryTotals;
+
+    final extras =
+        totals.keys
+            .where((category) => !_defaultOverviewCategories.contains(category))
+            .toList()
+          ..sort((a, b) => (totals[b] ?? 0).compareTo(totals[a] ?? 0));
+
+    return [..._defaultOverviewCategories, ...extras];
   }
 
   @override
@@ -442,6 +534,9 @@ class DashboardScreen extends StatelessWidget {
   // =========================================================
 
   Widget _buildOverviewCard() {
+    final order = _overviewCategoryOrder;
+    final totals = _categoryTotals;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -458,46 +553,22 @@ class DashboardScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildPieChart(),
+          _buildPieChart(order, totals),
 
           const SizedBox(width: 20),
 
           Expanded(
             child: Column(
               children: [
-                _buildCategoryRow(
-                  emoji: '🍔',
-                  color: const Color(0xFF7EBBA9),
-                  title: 'Food',
-                  amount: categoryTotal('Food'),
-                ),
-
-                const SizedBox(height: 10),
-
-                _buildCategoryRow(
-                  emoji: '🚗',
-                  color: const Color(0xFFFFA6AA),
-                  title: 'Transport',
-                  amount: categoryTotal('Transport'),
-                ),
-
-                const SizedBox(height: 10),
-
-                _buildCategoryRow(
-                  emoji: '🛍️',
-                  color: const Color(0xFFD9CCFF),
-                  title: 'Shopping',
-                  amount: categoryTotal('Shopping'),
-                ),
-
-                const SizedBox(height: 10),
-
-                _buildCategoryRow(
-                  emoji: '💡',
-                  color: const Color(0xFFFFD89C),
-                  title: 'Bills',
-                  amount: categoryTotal('Bills'),
-                ),
+                for (int i = 0; i < order.length; i++) ...[
+                  if (i > 0) const SizedBox(height: 10),
+                  _buildCategoryRow(
+                    emoji: emojiForCategory(order[i]),
+                    color: colorForCategory(order[i]),
+                    title: order[i],
+                    amount: totals[order[i]] ?? 0,
+                  ),
+                ],
               ],
             ),
           ),
@@ -510,13 +581,8 @@ class DashboardScreen extends StatelessWidget {
   // SIMPLE PIE STYLE
   // =========================================================
 
-  Widget _buildPieChart() {
-    final food = categoryTotal('Food');
-    final transport = categoryTotal('Transport');
-    final shopping = categoryTotal('Shopping');
-    final bills = categoryTotal('Bills');
-
-    final total = food + transport + shopping + bills;
+  Widget _buildPieChart(List<String> order, Map<String, double> totals) {
+    final total = totals.values.fold(0.0, (sum, value) => sum + value);
 
     if (total == 0) {
       return Container(
@@ -553,37 +619,14 @@ class DashboardScreen extends StatelessWidget {
               sectionsSpace: 3,
 
               sections: [
-                if (food > 0)
-                  PieChartSectionData(
-                    value: food,
-                    color: const Color(0xFF7EBBA9),
-                    radius: 22,
-                    showTitle: false,
-                  ),
-
-                if (transport > 0)
-                  PieChartSectionData(
-                    value: transport,
-                    color: const Color(0xFFFFA6AA),
-                    radius: 22,
-                    showTitle: false,
-                  ),
-
-                if (shopping > 0)
-                  PieChartSectionData(
-                    value: shopping,
-                    color: const Color(0xFFD9CCFF),
-                    radius: 22,
-                    showTitle: false,
-                  ),
-
-                if (bills > 0)
-                  PieChartSectionData(
-                    value: bills,
-                    color: const Color(0xFFFFD89C),
-                    radius: 22,
-                    showTitle: false,
-                  ),
+                for (final category in order)
+                  if ((totals[category] ?? 0) > 0)
+                    PieChartSectionData(
+                      value: totals[category]!,
+                      color: colorForCategory(category),
+                      radius: 22,
+                      showTitle: false,
+                    ),
               ],
             ),
           ),
@@ -707,7 +750,10 @@ class DashboardScreen extends StatelessWidget {
                     : _categoryBackground(item.category),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(item.emoji, style: const TextStyle(fontSize: 22)),
+              child: Text(
+                emojiForTransaction(item),
+                style: const TextStyle(fontSize: 22),
+              ),
             ),
 
             const SizedBox(width: 12),
@@ -852,6 +898,12 @@ class DashboardScreen extends StatelessWidget {
         return const Color(0xFFFFDFE6);
 
       default:
+        for (final custom in customCategories) {
+          if (custom['title'] == category) {
+            return Color(custom['color'] as int);
+          }
+        }
+
         return const Color(0xFFFFECE9);
     }
   }

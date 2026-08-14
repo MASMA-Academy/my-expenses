@@ -370,6 +370,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                     content: Text(
                                       'Please enter a category name.',
                                     ),
+                                    showCloseIcon: true,
                                   ),
                                 );
 
@@ -388,6 +389,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                     content: Text(
                                       'That category already exists.',
                                     ),
+                                    showCloseIcon: true,
                                   ),
                                 );
 
@@ -419,6 +421,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                 SnackBar(
                                   behavior: SnackBarBehavior.floating,
                                   content: Text('$title category added ✨'),
+                                  showCloseIcon: true,
                                 ),
                               );
                             },
@@ -743,6 +746,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                     content: Text(
                                       'Please enter a valid budget amount.',
                                     ),
+                                    showCloseIcon: true,
                                   ),
                                 );
 
@@ -774,6 +778,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                   content: Text(
                                     '$selectedCategory budget updated 💖',
                                   ),
+                                  showCloseIcon: true,
                                 ),
                               );
                             },
